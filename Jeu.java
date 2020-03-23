@@ -15,40 +15,22 @@ public class Jeu {
         }
     }
 
-    public Jeu(File fichier){
-        int m = 0;
+    public Jeu(File fichier) {
         jeu = new Region[3][3];
-        for(int i=0;i<3;i++) {
-            for(int j=0;j<3;j++){
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
                 jeu[i][j] = new Region();
             }
         }
-        try{
-            //on parcourt le fichier avec un scanner qui lit dans le fichier
+        try {
             Scanner sc = new Scanner(fichier);
-            //sc.useDelimiter(Pattern.compile(" "));
             String s;
             int courant;
-            int fixe;
-            boolean b;
-            for(int i=0;i<9;i++){
-                for(int j=0;j<9;j++){
-                    courant = sc.nextInt();
-                    this.setCaseNum(i,j,courant);
-                    fixe = sc.nextInt();
-                    if(fixe == 0)
-                        b =false;
-                    else
-                        b = true;
-                    this.setCaseFixe(i,j,b);
-                }
-                s = sc.nextLine();
-            }
-        }catch(FileNotFoundException e){
-            System.out.println("Erreur : le fichier n'est pas au bon emplacement !");
+        }catch (FileNotFoundException e)
+        {
+
         }
     }
-
 
     public Region getRegion(int i, int j) {
         return jeu[i][j];
@@ -72,17 +54,6 @@ public class Jeu {
 
     public boolean getCaseFixe(int i, int j) {
         return (jeu[(int)(i/3)][(int)(j/3)]).getCaseFixe(i%3, j%3);
-    }
-
-    public void setCaseFixe(int i, int j, boolean f){
-        (jeu[(int)(i/3)][(int)(j/3)]).setCaseFixe(i%3,j%3,f);
-    }
-
-    public int getCaseFixeInt(int i, int j) {
-        if( (jeu[(int)(i/3)][(int)(j/3)]).getCaseFixe(i%3,j%3) )
-            return 1;
-        else
-            return 0;
     }
 
     public boolean ligneCompte(int i) {
