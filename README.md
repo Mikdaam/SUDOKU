@@ -10,4 +10,4 @@ Représentation d'une case de la grille
 
 # Region
 
-Représentation d'une région : utilise Box
+Représentation d'une région : utilise *Box* **lol**
