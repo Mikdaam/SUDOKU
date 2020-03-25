@@ -1,37 +1,39 @@
-/*Classe qui gère une région 3*3*/
-public class Region
+public class Grid
 {
-	public Box[][] region; //une région
+	public Region[][] grid; //La grille de jeu complète
 
-	/*Initialisation des cases (vides) d'une région*/
-	public Region()
+	/*Initialisation les regions*/
+	public Grid()
 	{
-		this.region = new Box[3][3];
-		for(int posBoxX = 0; posBoxX < 3; posBoxX++)
+		this.grid = new Region[3][3];
+
+		for(int posRegionX = 0; posRegionX < 3; posRegionX++)
 		{
-			for(int posBoxY = 0; posBoxY < 3; posBoxY++)
+			for(int posRegionY = 0; posRegionY < 3; posRegionY++)
 			{
-				this.region[posBoxX][posBoxY] = new Box();
+				this.grid[posRegionX][posRegionY] = new Region();
 			}
 		}
 	}
 
-	/*Pour accéder à une case d'une région et à ses données (valeur si non vide, fixe ou non)*/
-	public Box getBox(int posBoxX, int posBoxY)
+	/*Ecrire le constructeur à partir d'un fichier*/
+
+	/*Pour accéder à une région*/
+	public Region getRegion(int posRegionX, int posRegionY)
 	{
-		return region[posBoxX][posBoxY];
+		return this.grid[posRegionX][posRegionY];
 	}
 
-	/*MAJ des données d'une case*/
-	public void setBox(int posBoxX, int posBoxY)
+	/*MAJ d'une région*/
+	public void setRegion(Region[][] region)
 	{
-		this.region[posBoxX][posBoxY].setNumber(region[posBoxX][posBoxY].getNumber());
+		this.grid = region;
 	}
 
 	/*La méthode vérifie si chaque case d'une région est vide ou si elle à une valeur.
 	  Si toutes les cases d'une région sont remplies d'une valeur différente à chaque fois,
 	  la fonction renvoie 'true'*/
-	public boolean filledRegion()
+	/*public boolean filledRegion()
 	{
 		boolean un = false;
 		boolean deux = false;		
@@ -92,34 +94,5 @@ public class Region
 					neuf = true;
 				}
 			}
-		}
-
-		if(un && deux && trois && quatre && cinq && six && sept && huit && neuf)
-		{
-			return true;
-		}
-
-		else
-		{
-			return false;
-		}
-	}
-
-	@Override
-	public String toString()
-	{
-		StringBuffer strb = new StringBuffer();
-
-		for(int posBoxX = 0; posBoxX < 3; posBoxX++)
-		{
-			for(int posBoxY = 0; posBoxY < 3; posBoxY++)
-			{
-				strb.append(this.region[posBoxX][posBoxY]);
-			}
-
-			strb.append("\n");
-		}
-		strb.append("\n\n");
-		return strb.toString();
-	}
+		}*/
 }

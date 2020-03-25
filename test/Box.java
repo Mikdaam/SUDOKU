@@ -41,6 +41,12 @@ public class Box
 		this.number = n;
 	}
 
+	/*MAJ de la valeur fixe d'une case*/
+	public void setIsFixed(boolean f)
+	{
+		this.isFixed = f;
+	}
+
 	/*Méthode qui convertit en chaine de caractère modifiable*/
 	@Override
 	public String toString()
