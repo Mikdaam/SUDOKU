@@ -13,7 +13,7 @@ public class Fenetre extends JFrame {
     private JMenuItem quitter;
     private GridLayout grille;
     private JPanel panGen;
-    private Grille pan;
+    private Gille pan;
     public Fenetre() {
         // appel le constructeur par défaut
         this.setSize(500, 500);
@@ -54,7 +54,7 @@ public class Fenetre extends JFrame {
         panGen.setBackground(Color.BLACK);
         panGen.setLayout(grille);
         for (int i = 0; i < 9; i++) {
-            pan = new Grille();
+            pan = new Gille();
             panGen.add(pan);
         }
         this.add(panGen);
