@@ -28,6 +28,7 @@ public class Button extends JButton
 		secondBrush.setColor(Color.WHITE);
 		secondBrush.fillRect(0, 0, this.getWidth(), this.getHeight());
 
+		secondBrush.setColor(Color.BLACK);
 		secondBrush.drawString(this.stringDigit, this.getWidth() / 2 - (this.getWidth()/ 2 /4), (this.getHeight() / 2) + 5);
 	}
 }

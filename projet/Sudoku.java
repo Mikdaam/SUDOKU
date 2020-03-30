@@ -12,6 +12,7 @@ public class Sudoku
 
 	private JPanel gridPanel = new JPanel(); //Un pannel général qui contient la grille
 	private JPanel[][] regionPanel = new JPanel[3][3]; //9 panneaux qui contiendront les régions
+	private Button[][] boxes = new Button[3][3];
 
 	private GridLayout gridLayout = new GridLayout(3, 3); //Disposition 3*3 de la grille et des régions
 	private GridLayout regionLayout = new GridLayout(3, 3); //Disposition 3*3 d'une région
@@ -19,8 +20,11 @@ public class Sudoku
 	public Sudoku()
 	{
 
-		this.gridLayout.setHgap(2);
-		this.gridLayout.setVgap(2);
+		this.gridLayout.setHgap(3);
+		this.gridLayout.setVgap(3);
+
+		this.regionLayout.setHgap(1);
+		this.regionLayout.setVgap(1);
 
 		this.gridPanel.setBackground(Color.BLACK);
 		this.gridPanel.setLayout(this.gridLayout);
@@ -30,6 +34,7 @@ public class Sudoku
 			for(int regionY = 0; regionY < 3; regionY++)
 			{
 				this.regionPanel[regionX][regionY] = new JPanel();
+				this.regionPanel[regionX][regionY].setBackground(Color.BLACK);
 				this.regionPanel[regionX][regionY].setLayout(this.regionLayout);
 
 				for(int boxX = 0; boxX < 3; boxX++)
@@ -39,13 +44,19 @@ public class Sudoku
 						int digit = this.sudoku.getRegion(regionX, regionY).getBoxDigit(boxX, boxY);
 						if(digit == 0)
 						{
-							this.regionPanel[regionX][regionY].add(new Button(" "), BorderLayout.CENTER);
+							this.boxes[boxX][boxY] = new Button(Integer.toString(digit));
+							this.boxes[boxX][boxY].addActionListener(new ButtonManagement());
+							//this.boxes[boxX][boxY].setBorderPainted(false);
 						}
 
 						else
 						{
-							this.regionPanel[regionX][regionY].add(new Button(Integer.toString(digit)), BorderLayout.CENTER);
+							this.boxes[boxX][boxY] = new Button(Integer.toString(digit));
+							this.boxes[boxX][boxY].addActionListener(new ButtonManagement());
+							this.boxes[boxX][boxY].setBorderPainted(false);
 						}
+
+						this.regionPanel[regionX][regionY].add(this.boxes[boxX][boxY]);
 					}
 				}
 
