@@ -19,7 +19,7 @@ public class Region
 	/*Pour accéder à une case d'une région et à ses données (valeur si non vide, fixe ou non)*/
 	public Box getBox(int posBoxX, int posBoxY)
 	{
-		return region[posBoxX][posBoxY];
+		return this.region[posBoxX][posBoxY];
 	}
 
 	/*MAJ des données d'une case*/
@@ -33,15 +33,15 @@ public class Region
 	  la fonction renvoie 'true'*/
 	public boolean filledRegion()
 	{
-		boolean un = false;
-		boolean deux = false;		
-		boolean trois = false;
-		boolean quatre = false;
-		boolean cinq = false;
+		boolean one = false;
+		boolean two = false;		
+		boolean three = false;
+		boolean four = false;
+		boolean five = false;
 		boolean six = false;
-		boolean sept = false;
-		boolean huit = false;
-		boolean neuf = false;
+		boolean seven = false;
+		boolean eight = false;
+		boolean nine = false;
 
 		for(int posBoxX = 0; posBoxX < 3; posBoxX++)
 		{
@@ -49,27 +49,27 @@ public class Region
 			{
 				if(this.region[posBoxX][posBoxY].getNumber() == 1)
 				{
-					un = true;
+					one = true;
 				}
 
 				else if(this.region[posBoxX][posBoxY].getNumber() == 2)
 				{
-					deux = true;
+					two = true;
 				}
 
 				else if(this.region[posBoxX][posBoxY].getNumber() == 3)
 				{
-					trois = true;
+					three = true;
 				}
 
 				else if(this.region[posBoxX][posBoxY].getNumber() == 4)
 				{
-					quatre = true;
+					four = true;
 				}
 
 				else if(this.region[posBoxX][posBoxY].getNumber() == 5)
 				{
-					cinq = true;
+					five = true;
 				}
 
 				else if(this.region[posBoxX][posBoxY].getNumber() == 6)
@@ -79,22 +79,22 @@ public class Region
 
 				else if(this.region[posBoxX][posBoxY].getNumber() == 7)
 				{
-					sept = true;
+					seven = true;
 				}
 
 				else if(this.region[posBoxX][posBoxY].getNumber() == 8)
 				{
-					huit = true;
+					eight = true;
 				}
 
 				else if(this.region[posBoxX][posBoxY].getNumber() == 9)
 				{
-					neuf = true;
+					nine = true;
 				}
 			}
 		}
 
-		if(un && deux && trois && quatre && cinq && six && sept && huit && neuf)
+		if(one && two && three && four && five && six && seven && eight && nine)
 		{
 			return true;
 		}

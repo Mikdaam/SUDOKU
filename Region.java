@@ -2,24 +2,24 @@
 
 public class Region
 {
-	public Box[][] region;
+	public Case[][] region;
 
 	public Region()
 	{
-		region = new Box[3][3];
+		region = new Case[3][3];
 
-		for(int posBoxX = 0; posBoxX < 3; posBoxX++)
+		for(int i = 0; i < 3; i++)
 		{
-			for(int posBoxY = 0; posBoxY < 3 ;posBoxY++)
+			for(int j = 0; j < 3 ;j++)
 			{
-				region[posBoxX][posBoxY] = new Case();
+				region[i][j] = new Case();
 			}
 		}
 	}
 
-	public Case getCase(int posBoxX, int posBoxY)
+	public Case getCase(int i, int j)
 	{
-		return region[posBoxX][posBoxY];
+		return region[i][j];
 	}
 
 	public void setCase(int i, int j, Case c)
