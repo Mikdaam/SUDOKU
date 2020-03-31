@@ -1,9 +1,13 @@
+/*Gestion de la grille complète de sudoku en mode graphique*/
+
 import javax.swing.JPanel;
+import javax.swing.JButton;
 
 import java.awt.GridLayout;
 import java.awt.Color;
 import java.awt.BorderLayout;
 
+/*Initialisation d'une grille de sudoku vide*/
 public class Sudoku
 {
 	private Frame frame = new Frame(); //Une fenêtre pour l'affichage du sudoku
@@ -12,10 +16,12 @@ public class Sudoku
 
 	private JPanel gridPanel = new JPanel(); //Un pannel général qui contient la grille
 	private JPanel[][] regionPanel = new JPanel[3][3]; //9 panneaux qui contiendront les régions
-	private Button[][] boxes = new Button[3][3];
+	private JButton[][] boxes = new JButton[3][3];
 
 	private GridLayout gridLayout = new GridLayout(3, 3); //Disposition 3*3 de la grille et des régions
 	private GridLayout regionLayout = new GridLayout(3, 3); //Disposition 3*3 d'une région
+
+	private int digit; //Valeur d'une case
 
 	public Sudoku()
 	{
@@ -41,21 +47,22 @@ public class Sudoku
 				{
 					for(int boxY = 0; boxY < 3; boxY++)
 					{
-						int digit = this.sudoku.getRegion(regionX, regionY).getBoxDigit(boxX, boxY);
-						if(digit == 0)
+						this.digit = this.sudoku.getRegion(regionX, regionY).getBoxDigit(boxX, boxY);
+						if(this.digit == 0)
 						{
-							this.boxes[boxX][boxY] = new Button(Integer.toString(digit));
-							this.boxes[boxX][boxY].addActionListener(new ButtonManagement());
-							//this.boxes[boxX][boxY].setBorderPainted(false);
+							this.boxes[boxX][boxY] = new JButton(" ");
 						}
 
 						else
 						{
-							this.boxes[boxX][boxY] = new Button(Integer.toString(digit));
-							this.boxes[boxX][boxY].addActionListener(new ButtonManagement());
-							this.boxes[boxX][boxY].setBorderPainted(false);
+							this.boxes[boxX][boxY] = new JButton(Integer.toString(this.digit));
 						}
 
+						Count counter = new Count();
+							this.boxes[boxX][boxY].addActionListener(new ButtonManagement(counter, this.boxes[boxX][boxY]));
+
+						this.boxes[boxX][boxY].setBorderPainted(false);
+						this.boxes[boxX][boxY].setBackground(Color.WHITE);
 						this.regionPanel[regionX][regionY].add(this.boxes[boxX][boxY]);
 					}
 				}
@@ -67,4 +74,6 @@ public class Sudoku
 		this.frame.add(this.gridPanel);
 		this.frame.setVisible(true);
 	}
+
+	/*MAJ d'une case*/
 }

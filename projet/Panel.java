@@ -1,3 +1,5 @@
+/*Gestion de l'apparence d'un panel*/
+
 import javax.swing.JPanel;
 
 import java.awt.Graphics;
