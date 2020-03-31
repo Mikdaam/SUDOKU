@@ -9,6 +9,7 @@ public class Frame extends JFrame
 	{
 		super("Sudoku");
 		this.setSize(600, 600);
+		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 }
