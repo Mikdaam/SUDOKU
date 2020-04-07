@@ -6,13 +6,13 @@ public class Box
 	public Box()
 	{
 		this.number = 0;
-		this.fixe = false;
+		this.isFixe = false;
 	}
 
 	public Box(int n)
 	{
 		this.number = n;
-		this.fixe = false;
+		this.isFixe = false;
 	}
 
 	public Box(int n, boolean f)

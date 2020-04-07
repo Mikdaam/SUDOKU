@@ -8,24 +8,24 @@ import java.io.*;
 public class Sudoku extends JFrame implements ActionListener
 {
 	Jeu jeu;
-	//File fichierCourant;
+	File fichierCourant;
 	Container c;
 	JPanel panel, panelGeneral, panelHaut;
 	JPanel[][] jp = new JPanel[3][3];
 	JButton  cases[][] = new JButton[9][9];
 	GridLayout grille;
-	/*JMenu menuFichier;
+	JMenu menuFichier;
 	JMenuBar menu;
-	JMenuItem enregistrer, fermer, nouveau, nouveauAlea, ouvrir, enregistrerSous, enregistrerModele, effacer, resoudre;*/
+	JMenuItem enregistrer, fermer, nouveau, nouveauAlea, ouvrir, enregistrerSous, enregistrerModele, effacer, resoudre;
 
 	public Sudoku()
 	{
 		super("Sudoku");
 		jeu = new Jeu();
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setSize(650,650);
 
-		/*menu = new JMenuBar();     
+		menu = new JMenuBar();     
 		menuFichier = new JMenu("Fichier"); 
 		ouvrir = new JMenuItem("Ouvrir");
 		fermer = new JMenuItem("Fermer");
@@ -74,7 +74,7 @@ public class Sudoku extends JFrame implements ActionListener
 		enregistrerSous.addActionListener(this); 
 		enregistrerModele.addActionListener(this);   
 		resoudre.addActionListener(this);    
-		setJMenuBar(menu);*/
+		setJMenuBar(menu);
 
 		c = getContentPane();    
 		panel = new JPanel();
@@ -83,7 +83,7 @@ public class Sudoku extends JFrame implements ActionListener
 		panelGeneral = new JPanel();
 		panelGeneral.setLayout(new BorderLayout());
 		panelGeneral.add(panel, BorderLayout.CENTER);
-		//effacer.addActionListener(this);
+		effacer.addActionListener(this);
 
 		for(int i = 0; i < 3; i++)
 		{
@@ -99,8 +99,7 @@ public class Sudoku extends JFrame implements ActionListener
 		{
 			for(int j = 0; j < 9; j++)
 			{
-				int in;
-				in = jeu.getCaseNum(i,j);
+				Integer in = new Integer((jeu.getCaseNum(i,j)));
 
 				if(in == 0)
 				{
@@ -109,7 +108,7 @@ public class Sudoku extends JFrame implements ActionListener
 
 				else
 				{
-					cases[i][j] = new JButton(Integer.toString(in));
+					cases[i][j] = new JButton(in.toString());
 				}
 
 				if(jeu.getCaseFixe(i,j))
@@ -132,10 +131,10 @@ public class Sudoku extends JFrame implements ActionListener
 
 		c.add(panelGeneral);
 
-		this.setVisible(true);
+		show();
 	}
 
-	/*public void boutonFix(int i,int j)
+	public void boutonFix(int i,int j)
 	{
 		if(jeu.getCaseFixe(i,j))
 		{
@@ -504,11 +503,11 @@ public class Sudoku extends JFrame implements ActionListener
 				}
 			}
 		}
-	}*/
+	}
 
 	public void actionPerformed(ActionEvent e)
 	{
-		/*for(int i = 0; i < 9; i++)
+		for(int i = 0; i < 9; i++)
 		{
 			for(int j = 0; j < 9; j++)
 			{
@@ -564,12 +563,12 @@ public class Sudoku extends JFrame implements ActionListener
 		if(e.getSource() == enregistrerModele)
 		{
 			this.sauverModele();
-		}*/
+		}
 	}
 
 	public static void main(String[] args)
 	{
-		//System.setProperty("apple.laf.useScreenMenuBar","true");
+		System.setProperty("apple.laf.useScreenMenuBar","true");
 		Sudoku fenetre = new Sudoku();
 	}
 }
