@@ -20,4 +20,8 @@ public class Count
 			this.digit = 0;
 		}
 	}
+
+	public int getDigit() {
+		return this.digit;
+	}
 }
