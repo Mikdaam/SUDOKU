@@ -7,70 +7,67 @@ import java.awt.event.*;
 
 public class Frame extends JFrame implements ActionListener
 {
-	private File fichierCourant;
-	private JMenu menuFichier;
+	private File f;
+	private JMenu fileMenu;
 	private JMenuBar menu;
-	private JMenuItem enregistrer, fermer, nouveau, nouveauAlea, ouvrir, enregistrerSous, enregistrerModele, effacer, resoudre;
+	private JMenuItem save, close, newGrid, importFile, saveAs, solve;
 
 	public Frame()
 	{
 		super("Sudoku");
 		this.setSize(600, 600);
+		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		/* On ajoite la barre des menus */
-		menu = new JMenuBar();
-        menuFichier = new JMenu("Fichier");
-        ouvrir = new JMenuItem("Importer");
-        fermer = new JMenuItem("Fermer");
-        nouveau = new JMenuItem("Nouvelle grille");
-        effacer = new JMenuItem("Effacer la grille");
-        nouveau = new JMenuItem("Nouvelle grille");
-        enregistrer = new JMenuItem("Enregistrer");
-        enregistrerSous = new JMenuItem("Enregistrer sous...");
-        resoudre = new JMenuItem("Resoudre ce Sudoku");
-        //on definit les raccourcis clavier
-        int shortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-        ouvrir.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, shortcutKeyMask));
-        fermer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, shortcutKeyMask));
-        nouveau.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, shortcutKeyMask));
-        effacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask));
-        enregistrer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcutKeyMask));
-        enregistrerSous.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcutKeyMask | java.awt.event.InputEvent.SHIFT_MASK));
-        resoudre.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, shortcutKeyMask));
-        //on ajoute les elements au menu
-        menuFichier.add(nouveau);
-       	menuFichier.addSeparator();
-        menuFichier.add(ouvrir);
-        menuFichier.add(fermer);
-        menuFichier.addSeparator();
-        menuFichier.add(effacer);
-        menuFichier.addSeparator();
-        menuFichier.add(enregistrer);
-        menuFichier.add(enregistrerSous);
-        menuFichier.addSeparator();
-        menuFichier.add(resoudre);
-        menu.add(menuFichier);
-        // on ajoute des listener au menu
-        ouvrir.addActionListener(this);
-        setJMenuBar(menu);		
+
+		/*Barre de menu*/
+
+		this.menu = new JMenuBar();
+
+		this.fileMenu = new JMenu("Fichier");
+
+		this.importFile = new JMenuItem("Importer");
+		this.close = new JMenuItem("Fermer");
+		this.newGrid = new JMenuItem("Nouveau");
+		this.save = new JMenuItem("Enregistrer");
+		this.saveAs = new JMenuItem("Enregistrer sous...");
+		this.solve = new JMenuItem("Resoudre");
+
+		this.fileMenu.add(this.importFile);
+		this.fileMenu.add(this.close);
+		this.fileMenu.add(this.newGrid);
+		this.fileMenu.add(this.save);
+		this.fileMenu.add(this.saveAs);
+		this.fileMenu.add(this.solve);
+
+		this.menu.add(this.fileMenu);
+
+		this.importFile.addActionListener(this);
+        setJMenuBar(this.menu);
 	}
 
-	/***Ouvre un fichier enregistre sur le disque dur*/
-    public void ouvrirFichier() {
-        String nomFic = new String("");
-        JFileChooser choix = new JFileChooser();
-        choix.setDialogTitle("Choisir le fichier");
-        choix.setApproveButtonText("Ok");
-        //intitule du bouton
-        int returnVal = choix.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File fichier = choix.getSelectedFile();
-        }
-        fichierCourant = choix.getSelectedFile();
-    }
+	public void openFile()
+	{
+		String fileName = new String("");
+		JFileChooser filePicked = new JFileChooser();
 
-    public void actionPerformed(ActionEvent e) {
-    	if (e.getSource() == ouvrir)
-            this.ouvrirFichier();
-    }
+		filePicked.setDialogTitle("Choisir un fichier");
+		filePicked.setApproveButtonText("OK");
+
+		int returnVal = filePicked.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+        {
+            File file = filePicked.getSelectedFile();
+        }
+        
+        this.f = filePicked.getSelectedFile();
+	}
+
+	public void actionPerformed(ActionEvent event)
+	{
+		if(event.getSource() == this.importFile)
+		{
+			openFile();
+		}
+	}
 }
