@@ -5,15 +5,7 @@ public class Count
 	@Override 
 	public String toString()
 	{
-		if(this.digit == 0)
-		{
-			return " ";
-		}
-
-		else
-		{
-			return Integer.toString(this.digit);
-		}
+		return Integer.toString(this.digit);
 	}
 
 	public void setDigit()
