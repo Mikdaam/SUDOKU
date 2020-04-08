@@ -29,7 +29,8 @@ public class Count
 		}
 	}
 
-	public int getDigit() {
+	public int getDigit()
+	{
 		return this.digit;
 	}
 }

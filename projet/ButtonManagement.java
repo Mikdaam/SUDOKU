@@ -19,9 +19,15 @@ public class ButtonManagement implements ActionListener
 	public void actionPerformed(ActionEvent event)
 	{
 		this.counter.setDigit();
-		if (this.counter.getDigit() == 0) {
+
+		if (this.counter.getDigit() == 0)
+		{
 			this.button.setText(" ");
-		}else
+		}
+
+		else
+		{
 			this.button.setText(this.counter.toString());
+		}
 	}
 }

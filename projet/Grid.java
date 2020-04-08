@@ -20,5 +20,5 @@ public class Grid
 	public Region getRegion(int regionX, int regionY)
 	{
 		return this.grid[regionX][regionY];
-	}	
+	}
 }

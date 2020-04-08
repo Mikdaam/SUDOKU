@@ -23,6 +23,10 @@ public class Sudoku
 	private int digit; //Valeur d'une case
 	private boolean isFixed; //Statut d'une case
 
+	private int[][][][] matriceSudo = {{ {{0,0,0},{5,3,0},{0,0,0}}, {{0,9,5},{4,0,8},{7,0,0}}, {{0,0,4},{7,0,2},{6,0,3}}},
+									   { {{9,0,0},{0,4,0},{0,2,0}}, {{0,3,4},{0,1,0},{5,7,0}}, {{0,8,0},{0,7,0},{0,0,6}}},
+									   { {{4,0,9},{6,0,7},{2,0,0}}, {{0,0,2},{9,0,3},{6,5,0}}, {{0,0,0},{0,2,1},{0,0,0}}} };
+
 	/*Initialisation d'une grille de sudoku vide*/
 	public Sudoku()
 	{
@@ -51,17 +55,31 @@ public class Sudoku
 				{
 					for(int boxY = 0; boxY < 3; boxY++)
 					{
+						int d = this.matriceSudo[regionX][regionY][boxX][boxY];
+
+						if(d != 0)
+						{
+							this.sudoku.getRegion(regionX, regionY).setBoxDigit(boxX, boxY, d);
+							this.sudoku.getRegion(regionX, regionY).setBoxIsFixed(boxX, boxY, true);
+						}
+
 						this.digit = this.sudoku.getRegion(regionX, regionY).getBoxDigit(boxX, boxY);
 						this.isFixed = this.sudoku.getRegion(regionX, regionY).getBoxIsFixed(boxX, boxY);
 
 						if((this.digit == 0))
 						{
 							this.boxes[boxX][boxY] = new Button(" ");
+							Count counter = new Count();
+							this.boxes[boxX][boxY].addActionListener(new ButtonManagement(counter, this.boxes[boxX][boxY]));
+							this.matriceSudo[regionX][regionY][boxX][boxY] = counter.getDigit();
 						}
 
 						else if((this.digit > 0) && (this.digit <= 9) && (this.isFixed == false))
 						{
 							this.boxes[boxX][boxY] = new Button(Integer.toString(this.digit));
+							Count counter = new Count();
+							this.boxes[boxX][boxY].addActionListener(new ButtonManagement(counter, this.boxes[boxX][boxY]));
+							this.matriceSudo[regionX][regionY][boxX][boxY] = counter.getDigit();
 						}
 
 						else
@@ -70,10 +88,6 @@ public class Sudoku
 							this.boxes[boxX][boxY] = new Button(Integer.toString(this.digit));
 							this.boxes[boxX][boxY].setFont(font);
 						}
-
-						/*Ajout d'un observateur aux boutons représentants les cases*/
-						Count counter = new Count();
-						this.boxes[boxX][boxY].addActionListener(new ButtonManagement(counter, this.boxes[boxX][boxY]));
 
 						this.regionPanel[regionX][regionY].add(this.boxes[boxX][boxY]);
 					}
@@ -87,7 +101,7 @@ public class Sudoku
 		this.frame.setVisible(true);
 	}
 
-	public boolean verifLine(int line)
+	public boolean verifLine(int regionLine, int regionY)
 	{
 		boolean one = false;
 		boolean two = false;
@@ -99,63 +113,199 @@ public class Sudoku
 		boolean eight = false;
 		boolean nine = false;
 
-		for(int column = 0; column < 9; column++)
+		for(int i = 0; i < 3; i++)
 		{
-			if(this.digit == 1)
+			for(int j = 0; j < 3; j++)
 			{
-				one = true;
-			}
+				if(this.matriceSudo[regionY][i][regionLine][j] == 1)
+				{
+					one = true;
+				}
 
-			else if(this.digit == 2)
-			{
-				two = true;
-			}
+				else if(this.matriceSudo[regionY][i][regionLine][j] == 2)
+				{
+					two = true;
+				}
 
-			else if(this.digit == 3)
-			{
-				three = true;
-			}
+				else if(this.matriceSudo[regionY][i][regionLine][j] == 3)
+				{
+					three = true;
+				}
 
-			else if(this.digit == 4)
-			{
-				four = true;
-			}
+				else if(this.matriceSudo[regionY][i][regionLine][j] == 4)
+				{
+					four = true;
+				}
 
-			else if(this.digit == 5)
-			{
-				five = true;
-			}
+				else if(this.matriceSudo[regionY][i][regionLine][j] == 5)
+				{
+					five = true;
+				}
 
-			else if(this.digit == 6)
-			{
-				six = true;
-			}
+				else if(this.matriceSudo[regionY][i][regionLine][j] == 6)
+				{
+					six = true;
+				}
 
-			else if(this.digit == 7)
-			{
-				seven = true;
-			}
+				else if(this.matriceSudo[regionY][i][regionLine][j] == 7)
+				{
+					seven = true;
+				}
 
-			else if(this.digit == 8)
-			{
-				eight = true;
-			}
+				else if(this.matriceSudo[regionY][i][regionLine][j] == 8)
+				{
+					eight = true;
+				}
 
-			else if(this.digit == 9)
-			{
-				nine = true;
+				else if(this.matriceSudo[regionY][i][regionLine][j] == 9)
+				{
+					nine = true;
+				}
+
+				System.out.print(this.matriceSudo[regionY][i][regionLine][j] + " ");
 			}
 		}
 
-		if(one && two && three && four && five && six && seven && eight && nine)
-		{
-			return true;
-		}
-
-		else
-		{
-			return false;
-		}
+		return (one&&two&&three&&four&&five&&six&&seven&&eight&&nine);
 	}
 	
+	public boolean verifColumn(int regionX, int regionColumn)
+	{
+		boolean one = false;
+		boolean two = false;
+		boolean three = false;
+		boolean four = false;
+		boolean five = false;
+		boolean six = false;
+		boolean seven = false;
+		boolean eight = false;
+		boolean nine = false;
+
+		for(int i = 0; i < 3; i++)
+		{
+			for(int j = 0; j < 3; j++)
+			{
+				if(this.matriceSudo[i][regionColumn][j][regionX] == 1)
+				{
+					one = true;
+				}
+
+				else if(this.matriceSudo[i][regionColumn][j][regionX] == 2)
+				{
+					two = true;
+				}
+
+				else if(this.matriceSudo[i][regionColumn][j][regionX] == 3)
+				{
+					three = true;
+				}
+
+				else if(this.matriceSudo[i][regionColumn][j][regionX] == 4)
+				{
+					four = true;
+				}
+
+				else if(this.matriceSudo[i][regionColumn][j][regionX] == 5)
+				{
+					five = true;
+				}
+
+				else if(this.matriceSudo[i][regionColumn][j][regionX] == 6)
+				{
+					six = true;
+				}
+
+				else if(this.matriceSudo[i][regionColumn][j][regionX] == 7)
+				{
+					seven = true;
+				}
+
+				else if(this.matriceSudo[i][regionColumn][j][regionX] == 8)
+				{
+					eight = true;
+				}
+
+				else if(this.matriceSudo[i][regionColumn][j][regionX] == 9)
+				{
+					nine = true;
+				}
+
+				System.out.println(this.matriceSudo[i][regionColumn][j][regionX] + " ");
+			}
+		}
+
+		System.out.println((one&&two&&three&&four&&five&&six&&seven&&eight&&nine));
+		return (one&&two&&three&&four&&five&&six&&seven&&eight&&nine);
+	}
+
+	public boolean verifRegion(int regionX, int regionY)
+	{
+		boolean one = false;
+		boolean two = false;
+		boolean three = false;
+		boolean four = false;
+		boolean five = false;
+		boolean six = false;
+		boolean seven = false;
+		boolean eight = false;
+		boolean nine = false;
+
+		for(int i = 0; i < 3; i++)
+		{
+			for(int j = 0; j < 3; j++)
+			{
+				if(this.matriceSudo[regionY][regionX][i][j] == 1)
+				{
+					one = true;
+				}
+
+				else if(this.matriceSudo[regionY][regionX][i][j] == 2)
+				{
+					two = true;
+				}
+
+				else if(this.matriceSudo[regionY][regionX][i][j] == 3)
+				{
+					three = true;
+				}
+
+				else if(this.matriceSudo[regionY][regionX][i][j] == 4)
+				{
+					four = true;
+				}
+
+				else if(this.matriceSudo[regionY][regionX][i][j] == 5)
+				{
+					five = true;
+				}
+
+				else if(this.matriceSudo[regionY][regionX][i][j] == 6)
+				{
+					six = true;
+				}
+
+				else if(this.matriceSudo[regionY][regionX][i][j] == 7)
+				{
+					seven = true;
+				}
+
+				else if(this.matriceSudo[regionY][regionX][i][j] == 8)
+				{
+					eight = true;
+				}
+
+				else if(this.matriceSudo[regionY][regionX][i][j] == 9)
+				{
+					nine = true;
+				}
+
+				System.out.print(this.matriceSudo[regionY][regionX][i][j] + " ");
+			}
+
+			System.out.println("");
+		}
+
+		System.out.println((one&&two&&three&&four&&five&&six&&seven&&eight&&nine));
+		return (one&&two&&three&&four&&five&&six&&seven&&eight&&nine);
+	}
 }
