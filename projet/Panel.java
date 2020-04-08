@@ -7,9 +7,18 @@ import java.awt.Color;
 
 public class Panel extends JPanel
 {
-	public Panel()
+	@Override
+	protected void paintComponent(Graphics brush)
 	{
-		super();
-		this.setBackground(Color.BLACK);
+		Graphics secondBrush = brush.create();
+
+		if(this.isOpaque())
+		{
+			secondBrush.setColor(this.getBackground());
+			secondBrush.fillRect(0, 0, this.getWidth(), this.getHeight());
+		}
+
+		secondBrush.setColor(Color.BLACK);
+		secondBrush.fillRect(0, 0, this.getWidth(), this.getHeight());
 	}
 }
