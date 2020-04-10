@@ -27,12 +27,12 @@ public class Box
 		this.isFixe = f;
 	}
 
-	public int getNumber()
+	public int getNum()
 	{
 		return this.number;
 	}
 
-	public void setNumber(int n)
+	public void setNum(int n)
 	{
 		this.number = n;
 	}
@@ -42,7 +42,7 @@ public class Box
 		return this.isFixe;
 	}
 
-	public void setIsFixe(boolean f)
+	public void setFixe(boolean f)
 	{
 		this.isFixe = f;
 	}

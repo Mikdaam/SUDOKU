@@ -12,17 +12,17 @@ public class Region
 		{
 			for(int posBoxY = 0; posBoxY < 3 ;posBoxY++)
 			{
-				region[posBoxX][posBoxY] = new Case();
+				region[posBoxX][posBoxY] = new Box();
 			}
 		}
 	}
 
-	public Case getCase(int posBoxX, int posBoxY)
+	public Box getCase(int posBoxX, int posBoxY)
 	{
 		return region[posBoxX][posBoxY];
 	}
 
-	public void setCase(int i, int j, Case c)
+	public void setCase(int i, int j, Box c)
 	{
 		(region[i][j]).setNum(c.getNum());
 	}
