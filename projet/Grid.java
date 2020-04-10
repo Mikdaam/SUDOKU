@@ -1,8 +1,17 @@
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+
+import javax.swing.JFileChooser;
 
 public class Grid extends Region
 {
 	public Region[][] grid; //La grille de jeu complète
+
+	private int[][] sudoMatrix = new int[9][9];
+
+	private File current;
 
 	/*Initialisation les regions*/
 	public Grid()
@@ -58,6 +67,16 @@ public class Grid extends Region
 	public void setBoxIsFixed(int i, int j, boolean isFixed)
 	{
 		this.getBoxRegion(i,j).setBoxIsFixed(i % 3, j % 3, isFixed);
+	}
+
+	public int[][] getMatrix()
+	{
+		return this.sudoMatrix;
+	}
+
+	public void setMatrix(int[][] matrix)
+	{
+		this.sudoMatrix = matrix;
 	}
 
 	/*Les méthodes vérifient si chaque case d'une ligne/colonne est vide ou si elle à une valeur.
@@ -126,6 +145,58 @@ public class Grid extends Region
 		return (one && two && three && four && five && six && seven && eight && nine);
 	}
 
+	public boolean ligneOK(int i, int _j)
+	{
+		if(this.getBoxDigit(i, _j) == 0)
+		{
+			return false;
+		}
+
+		int j = 0;
+		int tmp;
+
+		while(j < 9)
+		{
+			tmp = this.getBoxDigit(i,j);
+
+			if(tmp != 0)
+			{
+				for(int k = 0; k < 9; k++)
+				{
+					if(k != j)
+					{
+						if(tmp == this.getBoxDigit(i,k))
+						{
+							return false;
+						}
+					}
+				}
+			}
+
+			j++;
+		}
+
+		return true;
+	}
+
+	public boolean ligneOK(int i, int j, int val)
+	{
+		if(val == 0)
+		{
+			return false;
+		}
+
+		for(int k = 0; k < 9; k++)
+		{
+			if(val == this.getBoxDigit(i,k))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	public boolean filledColumn(int column)
 	{
 		boolean one = false;
@@ -187,6 +258,58 @@ public class Grid extends Region
 		}
 
 		return (one && two && three && four && five && six && seven && eight && nine);
+	}
+
+	public boolean colonneOK(int i, int j, int val)
+	{
+		if(val == 0)
+		{
+			return false;
+		}
+
+		for(int k=0;k<9;k++)
+		{
+			if(val == this.getBoxDigit(k,j))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public boolean colonneOK(int _i, int j)
+	{
+		if(this.getBoxDigit(_i,j) == 0)
+		{
+			return false;
+		}
+
+		int i = 0;
+		int tmp;
+
+		while(i<9)
+		{
+			tmp = this.getBoxDigit(i,j);
+
+			if(tmp != 0)
+			{
+				for(int k = 0; k < 9; k++)
+				{
+					if(k != i)
+					{
+						if(tmp == this.getBoxDigit(k,j))
+						{
+							return false;
+						}
+					}
+				}
+			}
+
+			i++;
+		}
+
+		return true;
 	}
 
 	public boolean winner()

@@ -123,6 +123,65 @@ public class Region
 		return (one && two && three && four && five && six && seven && eight && nine);
 	}
 
+	public boolean regionOK(int _i, int _j)
+	{
+		if(this.getBoxDigit(_i,_j) == 0)
+		{
+			return false;
+		}
+
+		int k=0;
+		int l=0;
+		int tmp;
+
+		while(k < 3 && l < 3)
+		{
+			tmp = (region[k][l]).getDigit();
+
+			if(tmp != 0)
+			{
+				for(int i = 0; i < 3; i++)
+				{
+					for(int j = 0; j < 3; j++)
+					{
+						if((i!=k) || (j!=l))
+						{
+							if((region[i][j]).getDigit() == tmp)
+							{
+								return false;
+							}
+						}
+					}
+
+					k++;
+					l++;
+				}
+
+			}
+		}
+		return true;
+	}
+
+	public boolean regionOK(int i, int j, int val)
+	{
+		if(val == 0)
+		{
+			return false;
+		}
+
+		for(int k = 0; k < 3; k++)
+		{
+			for(int l = 0; l < 3; l++)
+			{
+				if(this.getBoxDigit(k,l) == val)
+				{
+					return false;
+				}
+			}
+		}
+			return true;
+	}
+
 	/*@Override
 	public String toString()
 	{

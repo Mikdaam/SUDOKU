@@ -6,10 +6,13 @@ import javax.swing.JPanel;
 import javax.swing.BorderFactory;
 import javax.swing.JMenuItem;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 /*
@@ -39,11 +42,11 @@ public class Sudoku implements ActionListener
 	private Grid grid = new Grid();
 
 	private Container c = new Container();
-	private JPanel generalPanel = new JPanel();
+	private Panel generalPanel = new Panel();
 	private Panel gridPanel = new Panel();
 	private Panel[][] regionPanel = new Panel[3][3];
 
-	private Button[][] boxesButton = new Button[9][9];
+	private Button[][]boxesButton = new Button[9][9];
 
 	private GridLayout gridLayout = new GridLayout(3, 3);
 	private GridLayout regionLayout = new GridLayout(3, 3);
@@ -51,7 +54,7 @@ public class Sudoku implements ActionListener
 	private int digit; //Valeur d'une case
 	private boolean isFixed; //Statut d'une case
 
-	private int[][] sudoMatrix = {{0,0,0,0,9,5,0,0,4},
+	/*private int[][] sudoMatrix = {{0,0,0,0,9,5,0,0,4},
 								   {5,3,0,4,0,8,7,0,2},
 								   {0,0,0,7,0,0,6,0,3},
 								   {9,0,0,0,3,4,0,8,0},
@@ -59,7 +62,9 @@ public class Sudoku implements ActionListener
 								   {0,2,0,5,7,0,0,0,6},
 								   {4,0,9,0,0,2,0,0,0},
 								   {6,0,7,9,0,3,0,2,1},
-								   {2,0,0,6,5,0,0,0,0}};;
+								   {2,0,0,6,5,0,0,0,0}};;*/
+
+	private int[][] sudoMatrix = new int[9][9];
 
 	public Sudoku()
 	{
@@ -102,30 +107,36 @@ public class Sudoku implements ActionListener
 		{
 			for(int j = 0; j < 9; j++)
 			{
-				int d = this.grid.getBoxDigit(i, j);
-				boolean f = this.grid.getBoxIsFixed(i, j);
+				//int d = this.grid.getBoxDigit(i, j);
+				//boolean f = this.grid.getBoxIsFixed(i, j);
+				int d = this.sudoMatrix[i][j];
+				boolean f = false;
+
+				if(d != 0)
+				{
+					f = true;
+				}
 
 				if(d == 0)
 				{
 					this.boxesButton[i][j] = new Button(" ");
 					Count counter = new Count();
-					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j], f));
+					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j]));
 				}
 
 				else if((d != 0) && (f == false))
 				{
 					this.boxesButton[i][j] = new Button(Integer.toString(d));
 					Count counter = new Count();
-					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j], f));
+					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j]));
 				}
 
 				else if((d != 0) && (f == true))
 				{
 					this.boxesButton[i][j] = new Button(Integer.toString(d));
-					Font font = new Font("Arial", Font.PLAIN, 20);
+					Font font = new Font("Arial", Font.PLAIN, 25);
 					this.boxesButton[i][j].setFont(font);
-					Count counter = new Count();
-					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j], f));
+					this.boxesButton[i][j].setText(Integer.toString(d));
 				}
 
 				this.boxesButton[i][j].setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -135,6 +146,162 @@ public class Sudoku implements ActionListener
 		}
 		this.c.add(this.generalPanel);
 		this.frame.setVisible(true);
+	}
+
+	public void boutonFix(int i,int j)
+	{
+		if(this.grid.getBoxIsFixed(i,j))
+		{
+			(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 25));
+		}
+	}
+
+	public void verif(int i, int j)
+	{
+		this.boutonFix(i,j);
+		this.coloreRegion(i,j);
+
+		if(this.grid.filledLine(i))
+		{
+			this.coloreLigne(i);
+		}
+
+		else
+		{
+			this.decoloreLigne(i);
+		}
+
+		if(this.grid.filledColumn(j))
+		{
+			this.coloreColonne(j);
+		}
+
+		else
+		{
+			this.decoloreColonne(j);
+		}
+
+		if(this.grid.winner())
+		{
+			JOptionPane.showMessageDialog(this.frame, "Vous avez gagne !", "Felicitations", JOptionPane.PLAIN_MESSAGE);
+		}
+	}
+
+	public void coloreRegion(int i, int j)
+	{
+		if((this.grid.getBoxRegion(i,j)).filledRegion())
+		{
+			(this.regionPanel[(int)(i/3)][(int)(j/3)]).setBorder(BorderFactory.createLineBorder(Color.RED));
+		}
+
+		else
+		{
+			(this.regionPanel[(int)(i/3)][(int)(j/3)]).setBorder(BorderFactory.createEtchedBorder());
+		}
+	}
+
+	public void coloreLigne(int i)
+	{
+		for(int j = 0; j < 9; j++)
+		{
+			if((this.boxesButton[i][j]).getForeground() == Color.GREEN)
+			{
+				(this.boxesButton[i][j]).setForeground(Color.RED);
+				this.boutonFix(i,j);
+			}
+
+			else
+			{
+				(this.boxesButton[i][j]).setForeground(Color.BLUE);
+				(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 20));
+				this.boutonFix(i,j);
+			}
+		}
+	}
+
+	public void decoloreLigne(int i)
+	{
+		for(int j = 0; j < 9; j++)
+		{
+			if(((this.boxesButton[i][j]).getForeground() == Color.RED) || ((this.boxesButton[i][j]).getForeground() == Color.GREEN))
+			{
+				(this.boxesButton[i][j]).setForeground(Color.GREEN);
+				this.boutonFix(i,j);
+			}
+
+			else
+			{
+				(this.boxesButton[i][j]).setForeground(Color.BLACK);
+				(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 20));
+				this.boutonFix(i,j);
+			}
+		}
+	}
+
+	public void coloreColonne(int j)
+	{
+		for(int i = 0; i < 9; i++)
+		{
+			if((this.boxesButton[i][j]).getForeground() == Color.BLUE)
+			{
+				(this.boxesButton[i][j]).setForeground(Color.RED);
+				this.boutonFix(i,j);
+			}
+
+			else
+			{
+				(this.boxesButton[i][j]).setForeground(Color.GREEN);
+				(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 20));
+				this.boutonFix(i,j);
+			}
+		}
+	}
+
+	public void decoloreColonne(int j)
+	{
+		for(int i = 0; i < 9; i++)
+		{
+			if(((this.boxesButton[i][j]).getForeground() == Color.RED) || ((this.boxesButton[i][j]).getForeground() == Color.BLUE))
+			{
+				(this.boxesButton[i][j]).setForeground(Color.BLUE);
+				this.boutonFix(i,j);
+			}
+
+			else
+			{
+				(this.boxesButton[i][j]).setForeground(Color.BLACK);
+				(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 20));
+				this.boutonFix(i,j);
+			}
+		}
+	}
+
+	public void appuieBouton(int i, int j)
+	{
+		if(!this.grid.getBoxIsFixed(i,j))
+		{
+			if(this.grid.getBoxDigit(i,j) < 9)
+			{
+				this.grid.setBoxDigit(i,j,this.grid.getBoxDigit(i,j) + 1);
+			}
+
+			else
+			{
+				this.grid.setBoxDigit(i, j, 0);
+			}
+
+			Integer in = new Integer(this.grid.getBoxDigit(i,j));
+
+			if (in == 0)
+			{
+				(this.boxesButton[i][j]).setText("");
+			}
+
+			else
+			{
+				(this.boxesButton[i][j]).setText(in.toString());
+			}
+		}
 	}
 
 	public void openFile()
@@ -191,6 +358,7 @@ public class Sudoku implements ActionListener
 						//System.out.print("; j = "+j);
 						//System.out.println("; New fileName = " + fileName);
 						this.sudoMatrix[i][j] = Integer.parseInt(fileName.substring(j-(9-fileName.length()),j-(9-fileName.length())+1));
+						this.grid.setBoxDigit(i, j, this.sudoMatrix[i][j]);
 						//setValue(0,i,j,Integer.parseInt(fileName.substring(j-(9-fileName.length()),j-(9-fileName.length())+1)));
 						//setValueGrille(i,j,Integer.parseInt(fileName.substring(j-(9-fileName.length()),j-(9-fileName.length())+1)));
 					}
@@ -199,11 +367,14 @@ public class Sudoku implements ActionListener
 					{
 						//System.out.print("0");
 						this.sudoMatrix[i][j] = 0;
+						this.grid.setBoxDigit(i, j, this.sudoMatrix[i][j]);
 						//setValue(0,i,j,0);
 						//setValueGrille(i,j,0);
 					}
 				}
 			}
+
+			this.grid.setMatrix(this.sudoMatrix);
 		}
 
 		for(int i = 0; i < 9; i++)
@@ -249,7 +420,7 @@ public class Sudoku implements ActionListener
 		}
 
 
-		/*On refet une grille de jeu*/
+		/*On refet une grille de this.grid*/
 		/*this.grid = new Grid();
 
 		this.gridLayout.setHgap(3);
@@ -258,7 +429,7 @@ public class Sudoku implements ActionListener
 		this.c = new Container();
 		this.c = this.frame.getContentPane();
 
-		this.generalPanel = new JPanel();
+		this.generalPanel = new this.regionPanelanel();
 		this.generalPanel.setLayout(new BorderLayout());
 		this.generalPanel.add(this.gridPanel, BorderLayout.CENTER);
 
@@ -324,7 +495,7 @@ public class Sudoku implements ActionListener
 				this.gridPanel.add(this.regionPanel[(int)(i/3)][(int)(j/3)]);
 
 				Count counter = new Count();
-				this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j]));
+				this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j]
 			}
 		}
 
@@ -348,11 +519,71 @@ public class Sudoku implements ActionListener
         this.f = filePicked.getSelectedFile();*/
 	}
 
+	public void save()
+	{
+		JFileChooser filePicked = new JFileChooser(new File("."));						//On ouvre une fenêtre de filePicked de sauvegarde
+		File file;
+		String fileName = "";
+		int[] buffer = new int[82];			//1 place de plus que ce qu'il faut par sécurité
+
+		if(filePicked.showSaveDialog(null) == JFileChooser.APPROVE_OPTION)
+		{
+			file = filePicked.getSelectedFile();
+			String fp = new String(file.toString());
+			
+			try
+			{									//On écrit les valeurs de tous les tableaux dans le file choisi
+				FileOutputStream fileOut = new FileOutputStream(file);
+				DataOutputStream write = new DataOutputStream(fileOut);
+
+				for(int i = 0; i < 9; i++)
+				{
+					for(int j = 0; j < 9; j++)
+					{
+						//fileName += Integer.toHexString(getValeur(0,i, j));
+						fileName += Integer.toHexString(this.sudoMatrix[i][j]);
+					}
+
+					buffer[i] = Integer.parseInt(fileName);
+					fileName = "";
+				}
+
+				for(int i = 0; i < 9; i++)
+				{
+					write.writeInt(buffer[i]);
+				}
+
+				fileOut.close();
+
+				try
+				{
+					write.close();
+				}
+
+				catch(IOException ioee)
+				{
+					ioee.printStackTrace();
+				}
+
+			}
+
+			catch(IOException ioec)
+			{
+				ioec.printStackTrace();
+			}
+		}
+	}
+
 	public void actionPerformed(ActionEvent event)
 	{
 		if(event.getSource() == this.importFile)
 		{
-			openFile();
+			this.openFile();
+		}
+
+		if(event.getSource() == this.save)
+		{
+			this.save();
 		}
 	}
 }
