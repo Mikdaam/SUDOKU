@@ -1,144 +1,158 @@
-import java.util.*;
+/*Gestion de la grille complète de sudoku en mode graphique*/
 import java.awt.*;
-import javax.swing.*;
 import java.awt.event.*;
-import javax.swing.event.*;
-import java.io.*;
 
-public class Sudoku extends JFrame implements ActionListener
+import javax.swing.JPanel;
+import javax.swing.BorderFactory;
+import javax.swing.JMenuItem;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
+/*
+import javax.swing.*;
+import java.awt.Graphics;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;*/
+
+public class Sudoku implements ActionListener
 {
-	Jeu jeu;
-	File fichierCourant;
-	Container c;
-	JPanel panel, panelGeneral, panelHaut;
-	JPanel[][] jp = new JPanel[3][3];
-	JButton  cases[][] = new JButton[9][9];
-	GridLayout grille;
-	JMenu menuFichier;
-	JMenuBar menu;
-	JMenuItem enregistrer, fermer, nouveau, nouveauAlea, ouvrir, enregistrerSous, enregistrerModele, effacer, resoudre;
+	private JMenuItem save;
+	private JMenuItem close;
+	private JMenuItem newGrid;
+	private JMenuItem importFile;
+	private JMenuItem saveAs;
+	private JMenuItem solve;
+
+	private Frame frame = new Frame();
+
+	private Grid grid = new Grid();
+
+	private Container c = new Container();
+	private Panel generalPanel = new Panel();
+	private Panel gridPanel = new Panel();
+	private Panel[][] regionPanel = new Panel[3][3];
+
+	private Button[][]boxesButton = new Button[9][9];
+
+	private GridLayout gridLayout = new GridLayout(3, 3);
+	private GridLayout regionLayout = new GridLayout(3, 3);
+
+	private int digit; //Valeur d'une case
+	private boolean isFixed; //Statut d'une case
+
+	/*private int[][] sudoMatrix = {{0,0,0,0,9,5,0,0,4},
+								   {5,3,0,4,0,8,7,0,2},
+								   {0,0,0,7,0,0,6,0,3},
+								   {9,0,0,0,3,4,0,8,0},
+								   {0,4,0,0,1,0,0,7,0},
+								   {0,2,0,5,7,0,0,0,6},
+								   {4,0,9,0,0,2,0,0,0},
+								   {6,0,7,9,0,3,0,2,1},
+								   {2,0,0,6,5,0,0,0,0}};;*/
+
+	private int[][] sudoMatrix = new int[9][9];
 
 	public Sudoku()
 	{
-		super("Sudoku");
-		jeu = new Jeu();
-		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setSize(650,650);
+		this.save = this.frame.getSave();
+		this.close = this.frame.getClose();
+		this.newGrid = this.frame.getNewGrid();
+		this.importFile = this.frame.getImportFile();
+		this.saveAs = this.frame.getSaveAs();
+		this.solve = this.frame.getSolve();
 
-		menu = new JMenuBar();     
-		menuFichier = new JMenu("Fichier"); 
-		ouvrir = new JMenuItem("Ouvrir");
-		fermer = new JMenuItem("Fermer");
-		nouveau = new JMenuItem("Nouvelle grille");
-		effacer = new JMenuItem("Effacer la grille");
-		fermer = new JMenuItem("Fermer");
-		nouveau = new JMenuItem("Nouvelle grille");
-		nouveauAlea = new JMenuItem("Nouvelle grille aleatoire");    
-		enregistrer = new JMenuItem("Enregistrer");    
-		enregistrerSous = new JMenuItem("Enregistrer sous...");
-		enregistrerModele = new JMenuItem("Enregistrer comme modele");
-		resoudre = new JMenuItem("Resoudre ce Sudoku");
+		this.save.addActionListener(this);
+		this.close.addActionListener(this);
+		this.newGrid.addActionListener(this);
+		this.importFile.addActionListener(this);
+		this.saveAs.addActionListener(this);
+		this.solve.addActionListener(this);
 
-		int shortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-		ouvrir.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, shortcutKeyMask));
-		fermer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, shortcutKeyMask));
-		nouveau.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, shortcutKeyMask));
-		nouveauAlea.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, shortcutKeyMask | java.awt.event.InputEvent.SHIFT_MASK));
-		effacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask));
-		enregistrer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcutKeyMask));
-		enregistrerSous.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcutKeyMask | java.awt.event.InputEvent.SHIFT_MASK));
-		enregistrerModele.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcutKeyMask | java.awt.event.InputEvent.ALT_MASK));
-		resoudre.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, shortcutKeyMask));
+		/*Séparation entre les régions*/
+		this.gridLayout.setHgap(3);
+		this.gridLayout.setVgap(3);
 
-		menuFichier.add(nouveau);
-		menuFichier.add(nouveauAlea);
-		menuFichier.addSeparator();    
-		menuFichier.add(ouvrir);
-		menuFichier.add(fermer);
-		menuFichier.addSeparator();
-		menuFichier.add(effacer);
-		menuFichier.addSeparator();
-		menuFichier.add(enregistrer);     
-		menuFichier.add(enregistrerSous);
-		menuFichier.add(enregistrerModele);
-		menuFichier.addSeparator();
-		menuFichier.add(resoudre);
-		menu.add(menuFichier);
+		this.c = this.frame.getContentPane();
 
-		ouvrir.addActionListener(this);
-		nouveau.addActionListener(this);
-		nouveauAlea.addActionListener(this);
-		fermer.addActionListener(this);
-		effacer.addActionListener(this); 
-		enregistrer.addActionListener(this);     
-		enregistrerSous.addActionListener(this); 
-		enregistrerModele.addActionListener(this);   
-		resoudre.addActionListener(this);    
-		setJMenuBar(menu);
+		this.gridPanel.setLayout(this.gridLayout);
 
-		c = getContentPane();    
-		panel = new JPanel();
-		grille = new GridLayout(3,3);
-		panel.setLayout(grille);
-		panelGeneral = new JPanel();
-		panelGeneral.setLayout(new BorderLayout());
-		panelGeneral.add(panel, BorderLayout.CENTER);
-		effacer.addActionListener(this);
+		this.generalPanel.setLayout(new BorderLayout());
+		this.generalPanel.add(this.gridPanel, BorderLayout.CENTER);
 
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 3; j++)
 			{
-				jp[i][j] = new JPanel();
-				(jp[i][j]).setLayout(new GridLayout(3,3));
-				(jp[i][j]).setBorder(BorderFactory.createEtchedBorder());
+				this.regionPanel[i][j] = new Panel();
+				this.regionPanel[i][j].setLayout(this.regionLayout);
+				this.regionPanel[i][j].setBorder(BorderFactory.createCompoundBorder());
 			}
 		}
 
-		for(int i = 0; i < 9;i++)
+		for(int i = 0; i < 9; i++)
 		{
 			for(int j = 0; j < 9; j++)
 			{
-				Integer in = new Integer((jeu.getCaseNum(i,j)));
+				//int d = this.grid.getBoxDigit(i, j);
+				//boolean f = this.grid.getBoxIsFixed(i, j);
+				int d = this.sudoMatrix[i][j];
+				boolean f = false;
 
-				if(in == 0)
+				if(d != 0)
 				{
-					cases[i][j] = new JButton("");
+					f = true;
 				}
 
-				else
+				if(d == 0)
 				{
-					cases[i][j] = new JButton(in.toString());
+					this.boxesButton[i][j] = new Button(" ");
+					Count counter = new Count();
+					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j]));
 				}
 
-				if(jeu.getCaseFixe(i,j))
+				else if((d != 0) && (f == false))
 				{
-					(cases[i][j]).setFont(new java.awt.Font("Helvetica", java.awt.Font.BOLD, 25));
+					this.boxesButton[i][j] = new Button(Integer.toString(d));
+					Count counter = new Count();
+					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j]));
 				}
 
-				else
+				else if((d != 0) && (f == true))
 				{
-					(cases[i][j]).setFont(new java.awt.Font("Helvetica", java.awt.Font.PLAIN, 25));
+					this.boxesButton[i][j] = new Button(Integer.toString(d));
+					Font font = new Font("Arial", Font.PLAIN, 25);
+					this.boxesButton[i][j].setFont(font);
+					this.boxesButton[i][j].setText(Integer.toString(d));
 				}
 
-				(cases[i][j]).setSize(10,10);
-				(jp[(int)(i/3)][(int)(j/3)]).add(cases[i][j]);
-				panel.add(jp[(int)(i/3)][(int)(j/3)]);
-
-				(cases[i][j]).addActionListener(this);
+				this.boxesButton[i][j].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+				this.regionPanel[(int)(i/3)][(int)(j/3)].add(this.boxesButton[i][j]);
+				this.gridPanel.add(this.regionPanel[(int)(i/3)][(int)(j/3)]);
 			}
 		}
-
-		c.add(panelGeneral);
-
-		show();
+		this.c.add(this.generalPanel);
+		this.frame.setVisible(true);
 	}
 
 	public void boutonFix(int i,int j)
 	{
-		if(jeu.getCaseFixe(i,j))
+		if(this.grid.getBoxIsFixed(i,j))
 		{
-			(cases[i][j]).setFont(new java.awt.Font("Helvetica", java.awt.Font.BOLD, 25));
+			(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 25));
 		}
 	}
 
@@ -147,42 +161,42 @@ public class Sudoku extends JFrame implements ActionListener
 		this.boutonFix(i,j);
 		this.coloreRegion(i,j);
 
-		if(jeu.ligneCompte(i))
+		if(this.grid.filledLine(i))
 		{
-			coloreLigne(i);
+			this.coloreLigne(i);
 		}
 
 		else
 		{
-			decoloreLigne(i);
+			this.decoloreLigne(i);
 		}
 
-		if(jeu.colonneCompte(j))
+		if(this.grid.filledColumn(j))
 		{
-			coloreColonne(j);
+			this.coloreColonne(j);
 		}
 
 		else
 		{
-			decoloreColonne(j);
+			this.decoloreColonne(j);
 		}
 
-		if(jeu.gagne())
+		if(this.grid.winner())
 		{
-			JOptionPane.showMessageDialog(this, "Vous avez gagne !", "Felicita-tions", JOptionPane.PLAIN_MESSAGE);
+			JOptionPane.showMessageDialog(this.frame, "Vous avez gagne !", "Felicitations", JOptionPane.PLAIN_MESSAGE);
 		}
 	}
 
 	public void coloreRegion(int i, int j)
 	{
-		if((jeu.getRegionDeCase(i,j)).regionCompte())
+		if((this.grid.getBoxRegion(i,j)).filledRegion())
 		{
-			(jp[(int)(i/3)][(int)(j/3)]).setBorder(BorderFactory.createLineBorder(Color.red));
+			(this.regionPanel[(int)(i/3)][(int)(j/3)]).setBorder(BorderFactory.createLineBorder(Color.RED));
 		}
 
 		else
 		{
-			(jp[(int)(i/3)][(int)(j/3)]).setBorder(BorderFactory.createEtchedBorder());
+			(this.regionPanel[(int)(i/3)][(int)(j/3)]).setBorder(BorderFactory.createEtchedBorder());
 		}
 	}
 
@@ -190,16 +204,16 @@ public class Sudoku extends JFrame implements ActionListener
 	{
 		for(int j = 0; j < 9; j++)
 		{
-			if((cases[i][j]).getForeground() == Color.green)
+			if((this.boxesButton[i][j]).getForeground() == Color.GREEN)
 			{
-				(cases[i][j]).setForeground(Color.red);
+				(this.boxesButton[i][j]).setForeground(Color.RED);
 				this.boutonFix(i,j);
 			}
 
 			else
 			{
-				(cases[i][j]).setForeground(Color.blue);
-				(cases[i][j]).setFont(new java.awt.Font("Helvetica", java.awt.Font.PLAIN, 25));
+				(this.boxesButton[i][j]).setForeground(Color.BLUE);
+				(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 20));
 				this.boutonFix(i,j);
 			}
 		}
@@ -209,16 +223,16 @@ public class Sudoku extends JFrame implements ActionListener
 	{
 		for(int j = 0; j < 9; j++)
 		{
-			if(((cases[i][j]).getForeground() == Color.red) || ((cases[i][j]).getForeground() == Color.green))
+			if(((this.boxesButton[i][j]).getForeground() == Color.RED) || ((this.boxesButton[i][j]).getForeground() == Color.GREEN))
 			{
-				(cases[i][j]).setForeground(Color.green);
+				(this.boxesButton[i][j]).setForeground(Color.GREEN);
 				this.boutonFix(i,j);
 			}
 
 			else
 			{
-				(cases[i][j]).setForeground(Color.black);
-				(cases[i][j]).setFont(new java.awt.Font("Helvetica", java.awt.Font.PLAIN, 25));
+				(this.boxesButton[i][j]).setForeground(Color.BLACK);
+				(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 20));
 				this.boutonFix(i,j);
 			}
 		}
@@ -228,16 +242,16 @@ public class Sudoku extends JFrame implements ActionListener
 	{
 		for(int i = 0; i < 9; i++)
 		{
-			if((cases[i][j]).getForeground() == Color.blue)
+			if((this.boxesButton[i][j]).getForeground() == Color.BLUE)
 			{
-				(cases[i][j]).setForeground(Color.red);
+				(this.boxesButton[i][j]).setForeground(Color.RED);
 				this.boutonFix(i,j);
 			}
 
 			else
 			{
-				(cases[i][j]).setForeground(Color.green);
-				(cases[i][j]).setFont(new java.awt.Font("Helvetica", java.awt.Font.PLAIN, 25));
+				(this.boxesButton[i][j]).setForeground(Color.GREEN);
+				(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 20));
 				this.boutonFix(i,j);
 			}
 		}
@@ -247,16 +261,16 @@ public class Sudoku extends JFrame implements ActionListener
 	{
 		for(int i = 0; i < 9; i++)
 		{
-			if(((cases[i][j]).getForeground() == Color.red) || ((cases[i][j]).getForeground() == Color.blue))
+			if(((this.boxesButton[i][j]).getForeground() == Color.RED) || ((this.boxesButton[i][j]).getForeground() == Color.BLUE))
 			{
-				(cases[i][j]).setForeground(Color.blue);
+				(this.boxesButton[i][j]).setForeground(Color.BLUE);
 				this.boutonFix(i,j);
 			}
 
 			else
 			{
-				(cases[i][j]).setForeground(Color.black);
-				(cases[i][j]).setFont(new java.awt.Font("Helvetica", java.awt.Font.PLAIN, 25));
+				(this.boxesButton[i][j]).setForeground(Color.BLACK);
+				(this.boxesButton[i][j]).setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 20));
 				this.boutonFix(i,j);
 			}
 		}
@@ -264,312 +278,312 @@ public class Sudoku extends JFrame implements ActionListener
 
 	public void appuieBouton(int i, int j)
 	{
-		if(!jeu.getCaseFixe(i,j))
+		if(!this.grid.getBoxIsFixed(i,j))
 		{
-			if(jeu.getCaseNum(i,j) < 9)
+			if(this.grid.getBoxDigit(i,j) < 9)
 			{
-				jeu.setCaseNum(i,j,jeu.getCaseNum(i,j) + 1);
+				this.grid.setBoxDigit(i,j,this.grid.getBoxDigit(i,j) + 1);
 			}
 
 			else
 			{
-				jeu.setCaseNum(i, j, 0);
+				this.grid.setBoxDigit(i, j, 0);
 			}
 
-			Integer in = new Integer(jeu.getCaseNum(i,j));
+			int d = this.grid.getBoxDigit(i,j);
 
-			if (in == 0)
+			if (d == 0)
 			{
-				(cases[i][j]).setText("");
+				(this.boxesButton[i][j]).setText("");
 			}
 
 			else
 			{
-				(cases[i][j]).setText(in.toString());
+				(this.boxesButton[i][j]).setText(Integer.toString(d));
 			}
 		}
 	}
 
-	public void nouveauFichier()
+	public void openFile()
 	{
-		Jeu tmp = new Jeu();
-		jeu = tmp;
-		for(int i = 0; i < 9; i++)
+		JFileChooser filePicked = new JFileChooser(new File("."));
+		File file;
+		String fileName = "";
+
+		int[] buffer = new int[82];
+
+		if(filePicked.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
 		{
-			for(int j = 0; j < 9; j++)
+			file = filePicked.getSelectedFile();
+			try
 			{
-				(cases[i][j]).setText("");
-			}
-		}
+				FileInputStream fileIn = new FileInputStream(file);
+				DataInputStream read = new DataInputStream(fileIn);
 
-		fichierCourant = null;
-	}
-
-	public void nouveauFichierAlea()
-	{
-		jeu.remplirRandom();
-
-		for(int i = 0; i < 9; i++)
-		{
-			for(int j = 0; j < 9; j++)
-			{
-				Integer in = new Integer((jeu.getCaseNum(i,j)));
-
-				if(in == 0)
+				for(int i = 0; i < 9; i++)
 				{
-					(cases[i][j]).setText("");
+					buffer[i] = read.readInt();
+					//System.out.println(Integer.toString(buffer[i]));
 				}
 
-				else
+				try
 				{
-					(cases[i][j]).setText(in.toString());
+					read.close();
 				}
 
-				this.boutonFix(i,j);
+				catch(IOException ioe)
+				{
+					ioe.printStackTrace();
+				}
+
+				fileIn.close();
 			}
-		}
-	}
 
-	public void ouvrirFichier()
-	{
-		String nomFic = new String("");
-		JFileChooser choix = new JFileChooser();
-		choix.setDialogTitle("Choisir le fichier");
-		choix.setApproveButtonText("Ok");
+			catch(IOException ioe)
+			{
+				ioe.printStackTrace();
+			}
 
-		int returnVal = choix.showOpenDialog(this);
 
-		if(returnVal == JFileChooser.APPROVE_OPTION)
-		{
-			File fichier = choix.getSelectedFile();
-			Jeu jeuTmp = new Jeu(fichier);
-			jeu = jeuTmp;
+
 			for(int i = 0; i < 9; i++)
 			{
+				fileName = Integer.toString(buffer[i]);
+				//System.out.println("fileName length = " + fileName.length());
 				for(int j = 0; j < 9; j++)
-				{
-					Integer in = new Integer((jeu.getCaseNum(i,j)));
-
-					if(in == 0)
+				{	
+					if(j-(9-fileName.length()) >= 0)
 					{
-						(cases[i][j]).setText("");
+						//System.out.println(fileName);
+						//System.out.print("; j = "+j);
+						//System.out.println("; New fileName = " + fileName);
+						this.sudoMatrix[i][j] = Integer.parseInt(fileName.substring(j-(9-fileName.length()),j-(9-fileName.length())+1));
+						this.grid.setBoxDigit(i, j, this.sudoMatrix[i][j]);
+						//setValue(0,i,j,Integer.parseInt(fileName.substring(j-(9-fileName.length()),j-(9-fileName.length())+1)));
+						//setValueGrille(i,j,Integer.parseInt(fileName.substring(j-(9-fileName.length()),j-(9-fileName.length())+1)));
 					}
 
 					else
 					{
-						(cases[i][j]).setText(in.toString());
+						//System.out.print("0");
+						this.sudoMatrix[i][j] = 0;
+						this.grid.setBoxDigit(i, j, this.sudoMatrix[i][j]);
+						//setValue(0,i,j,0);
+						//setValueGrille(i,j,0);
 					}
-
-					this.boutonFix(i,j);
 				}
 			}
 
-			fichierCourant = choix.getSelectedFile();
-		}
-	}
-
-	public void sauverModele()
-	{
-		String nomFic = new String("");
-		JFileChooser choix = new JFileChooser();
-		int returnVal = choix.showSaveDialog(this);
-
-		if(returnVal == JFileChooser.APPROVE_OPTION)
-		{
-			nomFic = choix.getSelectedFile().getAbsolutePath();
-
-			try
-			{
-				FileWriter fichier = new FileWriter(nomFic);
-
-				for(int i = 0; i < 9; i++)
-				{
-					for(int j = 0; j < 9; j++)
-					{
-						fichier.write(jeu.getCaseNum(i,j)+" ");
-
-						if(jeu.getCaseNum(i,j) != 0)
-						{
-							fichier.write("1"+" ");
-							jeu.setCaseFixe(i,j,true);
-						}
-
-						else
-						{
-							fichier.write("0"+" ");
-							jeu.setCaseFixe(i,j,false);
-						}
-
-						this.boutonFix(i,j);
-					}
-
-					fichier.write("\n");
-				}
-
-				fichier.close();
-				fichierCourant = choix.getSelectedFile();
-			}
-			catch(IOException e)
-			{
-				JOptionPane.showMessageDialog(this, "Impossible d'enregistrer le fichier !", "Dommage", JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
-
-	public void sauverFichier()
-	{
-		String nomFic = new String("");
-
-		try
-		{
-			nomFic = fichierCourant.getAbsolutePath();
-
-			try
-			{
-				FileWriter fichier = new FileWriter(nomFic);
-
-				for(int i = 0; i < 9; i++)
-				{
-					for(int j = 0; j < 9; j++)
-					{
-						fichier.write(jeu.getCaseNum(i,j)+" ");
-						fichier.write(jeu.getCaseFixeInt(i,j)+" ");
-					}
-
-					fichier.write("\n");
-				}
-
-				fichier.close();
-			}
-			catch(IOException e)
-			{
-				JOptionPane.showMessageDialog(this, "Impossible d'enregis-trer le fichier !", "Dommage", JOptionPane.ERROR_MESSAGE);
-			}
+			this.grid.setMatrix(this.sudoMatrix);
 		}
 
-		catch(NullPointerException e)
-		{
-			this.sauverFichierSous();
-		}
-	}
-
-	public void sauverFichierSous()
-	{
-		String nomFic = new String("");
-		JFileChooser choix = new JFileChooser();
-		int returnVal = choix.showSaveDialog(this);
-
-		if(returnVal == JFileChooser.APPROVE_OPTION)
-		{
-			nomFic = choix.getSelectedFile().getAbsolutePath();
-
-			try
-			{
-				FileWriter fichier = new FileWriter(nomFic);
-
-				for(int i = 0; i < 9; i++)
-				{
-					for(int j = 0; j < 9; j++)
-					{
-						fichier.write(jeu.getCaseNum(i,j)+" ");
-						fichier.write(jeu.getCaseFixeInt(i,j)+" ");
-					}
-
-					fichier.write("\n");
-				}
-
-				fichier.close();
-				fichierCourant = choix.getSelectedFile();
-			}
-
-			catch(IOException e)
-			{
-				JOptionPane.showMessageDialog(this, "Impossible d'enregistrer le fichier !", "Dommage", JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
-
-	public void effacer()
-	{
 		for(int i = 0; i < 9; i++)
 		{
 			for(int j = 0; j < 9; j++)
 			{
-				if(!jeu.getCaseFixe(i,j))
+				int d = this.sudoMatrix[i][j];
+				boolean f = false;
+
+				if(d == 0)
 				{
-					jeu.setCaseNum(i,j,0);
-					(cases[i][j]).setText("");
-					this.verif(i,j);
+					f = false;
+				}
+
+				else
+				{
+					f = true;
+				}
+
+				this.grid.setBoxDigit(i, j, d);
+				this.grid.setBoxIsFixed(i, j, f);
+
+				this.digit = this.grid.getBoxDigit(i, j);
+				this.isFixed = this.grid.getBoxIsFixed(i, j);
+
+				if(this.digit == 0)
+				{
+					this.boxesButton[i][j].setText(" ");
+				}
+
+				else if((this.digit >= 0) && (this.digit <= 9) && (this.isFixed == false))
+				{
+					this.boxesButton[i][j].setText(Integer.toString(d));
+				}
+
+				else if((this.digit >= 0) && (this.digit <= 9) && (this.isFixed == true))
+				{
+					Font font = new Font("Arial", Font.BOLD, 20);
+					this.boxesButton[i][j].setText(Integer.toString(d));
+					this.boxesButton[i][j].setFont(font);
 				}
 			}
 		}
-	}
 
-	public void actionPerformed(ActionEvent e)
-	{
+
+		/*On refet une grille de this.grid*/
+		/*this.grid = new Grid();
+
+		this.gridLayout.setHgap(3);
+		this.gridLayout.setVgap(3);
+
+		this.c = new Container();
+		this.c = this.frame.getContentPane();
+
+		this.generalPanel = new this.regionPanelanel();
+		this.generalPanel.setLayout(new BorderLayout());
+		this.generalPanel.add(this.gridPanel, BorderLayout.CENTER);
+
+		this.boxesButton = new Button[9][9];
+
+		this.gridLayout = new GridLayout(3, 3);
+		this.regionLayout = new GridLayout(3, 3);
+
+		this.regionPanel = new Panel[3][3];
+
+		this.gridPanel = new Panel();
+		this.gridPanel.setLayout(this.gridLayout);
+
+		for(int i = 0; i < 3; i++)
+		{
+			for(int j = 0; j < 3; j++)
+			{
+				this.regionPanel[i][j] = new Panel();
+				this.regionPanel[i][j].setLayout(this.regionLayout);
+				this.regionPanel[i][j].setBorder(BorderFactory.createCompoundBorder());
+			}
+		}
+
 		for(int i = 0; i < 9; i++)
 		{
 			for(int j = 0; j < 9; j++)
 			{
-				if(e.getSource() == cases[i][j])
+				int d = this.sudoMatrix[i][j];
+				boolean f = false;
+
+				if(d == 0)
 				{
-					this.appuieBouton(i, j);
-					this.verif(i, j);
+					f = false;
 				}
+
+				else
+				{
+					f = true;
+				}
+
+				this.grid.setBoxDigit(i, j, d);
+				this.grid.setBoxIsFixed(i, j, f);
+
+				if(d == 0)
+				{
+					this.boxesButton[i][j] = new Button(" ");
+				}
+
+				else if((d != 0) && (f == false))
+				{
+					this.boxesButton[i][j] = new Button(Integer.toString(d));
+				}
+
+				else if((d != 0) && (f == true))
+				{
+					this.boxesButton[i][j] = new Button(Integer.toString(d));
+					Font font = new Font("Arial", Font.PLAIN, 20);
+					this.boxesButton[i][j].setFont(font);
+				}
+
+				this.boxesButton[i][j].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+				this.regionPanel[(int)(i/3)][(int)(j/3)].add(this.boxesButton[i][j]);
+				this.gridPanel.add(this.regionPanel[(int)(i/3)][(int)(j/3)]);
+
+				Count counter = new Count();
+				this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j]
 			}
 		}
 
-		if(e.getSource() == enregistrer)
-		{
-			this.sauverFichier();
-		}
+		this.generalPanel.add(this.gridPanel);
+		this.c.add(this.generalPanel);
+		this.frame.setVisible(true);*/
 
-		if(e.getSource() == enregistrerSous)
-		{
-			this.sauverFichierSous();
-		}
+		/*String fileNamee = new String("");
+		JFileChooser filePicked = new JFileChooser();
 
-		if(e.getSource() == ouvrir)
-		{
-			this.ouvrirFichier();
-		}
+		filePicked.setDialogTitle("Choisir un file");
+		filePicked.setApproveButtonText("OK");
 
-		if(e.getSource() == fermer)
-		{
-			int reponse = JOptionPane.showConfirmDialog(this,"Voulez vous enre-gistrer le fichier ?","Attention", JOptionPane.YES_NO_OPTION);
+		int returnVal = filePicked.showOpenDialog(this);
 
-			if(reponse == JOptionPane.YES_OPTION)
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+        {
+            File file = filePicked.getSelectedFile();
+        }
+        
+        this.f = filePicked.getSelectedFile();*/
+	}
+
+	public void save()
+	{
+		JFileChooser filePicked = new JFileChooser(new File("."));						//On ouvre une fenêtre de filePicked de sauvegarde
+		File file;
+		String fileName = "";
+		int[] buffer = new int[82];			//1 place de plus que ce qu'il faut par sécurité
+
+		if(filePicked.showSaveDialog(null) == JFileChooser.APPROVE_OPTION)
+		{
+			file = filePicked.getSelectedFile();
+			String fp = new String(file.toString());
+			
+			try
+			{									//On écrit les valeurs de tous les tableaux dans le file choisi
+				FileOutputStream fileOut = new FileOutputStream(file);
+				DataOutputStream write = new DataOutputStream(fileOut);
+
+				for(int i = 0; i < 9; i++)
+				{
+					for(int j = 0; j < 9; j++)
+					{
+						//fileName += Integer.toHexString(getValeur(0,i, j));
+						fileName += Integer.toHexString(this.sudoMatrix[i][j]);
+					}
+
+					buffer[i] = Integer.parseInt(fileName);
+					fileName = "";
+				}
+
+				for(int i = 0; i < 9; i++)
+				{
+					write.writeInt(buffer[i]);
+				}
+
+				fileOut.close();
+
+				try
+				{
+					write.close();
+				}
+
+				catch(IOException ioee)
+				{
+					ioee.printStackTrace();
+				}
+
+			}
+
+			catch(IOException ioec)
 			{
-				this.sauverFichier();
+				ioec.printStackTrace();
 			}
-			System.exit(0);
-		}
-
-		if(e.getSource() == effacer)
-		{
-			this.effacer();
-		}
-
-		if(e.getSource() == nouveau)
-		{
-			this.nouveauFichier();
-		}
-
-		if(e.getSource() == nouveauAlea)
-		{
-			this.nouveauFichierAlea();
-		}
-
-		if(e.getSource() == enregistrerModele)
-		{
-			this.sauverModele();
 		}
 	}
 
-	public static void main(String[] args)
+	public void actionPerformed(ActionEvent event)
 	{
-		System.setProperty("apple.laf.useScreenMenuBar","true");
-		Sudoku fenetre = new Sudoku();
+		if(event.getSource() == this.importFile)
+		{
+			this.openFile();
+		}
+
+		if(event.getSource() == this.save)
+		{
+			this.save();
+		}
 	}
 }
-
