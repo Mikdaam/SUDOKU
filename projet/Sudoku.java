@@ -1,311 +1,354 @@
 /*Gestion de la grille complète de sudoku en mode graphique*/
+import java.awt.*;
+import java.awt.event.*;
 
 import javax.swing.JPanel;
+import javax.swing.BorderFactory;
+import javax.swing.JMenuItem;
+import javax.swing.JFileChooser;
 
-import java.awt.GridLayout;
-import java.awt.Color;
-import java.awt.BorderLayout;
-import java.awt.Font;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 
-public class Sudoku
+/*
+import javax.swing.*;
+import java.awt.Graphics;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;*/
+
+public class Sudoku implements ActionListener
 {
-	private Frame frame = new Frame(); //Une fenêtre pour l'affichage du sudoku
+	private JMenuItem save;
+	private JMenuItem close;
+	private JMenuItem newGrid;
+	private JMenuItem importFile;
+	private JMenuItem saveAs;
+	private JMenuItem solve;
 
-	private Grid sudoku = new Grid(); //La grille générale de sudoku
+	private Frame frame = new Frame();
 
-	private Panel gridPanel = new Panel(); //Un pannel général qui contient la grille
-	private Panel[][] regionPanel = new Panel[3][3]; //9 panneaux qui contiendront les régions
-	private Button[][] boxes = new Button[3][3];
+	private Grid grid = new Grid();
 
-	private GridLayout gridLayout = new GridLayout(3, 3); //Disposition 3*3 de la grille et des régions
-	private GridLayout regionLayout = new GridLayout(3, 3); //Disposition 3*3 d'une région
+	private Container c = new Container();
+	private JPanel generalPanel = new JPanel();
+	private Panel gridPanel = new Panel();
+	private Panel[][] regionPanel = new Panel[3][3];
+
+	private Button[][] boxesButton = new Button[9][9];
+
+	private GridLayout gridLayout = new GridLayout(3, 3);
+	private GridLayout regionLayout = new GridLayout(3, 3);
 
 	private int digit; //Valeur d'une case
 	private boolean isFixed; //Statut d'une case
 
-	private int[][][][] matriceSudo = {{ {{0,0,0},{5,3,0},{0,0,0}}, {{0,9,5},{4,0,8},{7,0,0}}, {{0,0,4},{7,0,2},{6,0,3}}},
-									   { {{9,0,0},{0,4,0},{0,2,0}}, {{0,3,4},{0,1,0},{5,7,0}}, {{0,8,0},{0,7,0},{0,0,6}}},
-									   { {{4,0,9},{6,0,7},{2,0,0}}, {{0,0,2},{9,0,3},{6,5,0}}, {{0,0,0},{0,2,1},{0,0,0}}} };
+	private int[][] sudoMatrix = new int[9][9];
 
-	/*Initialisation d'une grille de sudoku vide*/
 	public Sudoku()
 	{
+		this.save = this.frame.getSave();
+		this.close = this.frame.getClose();
+		this.newGrid = this.frame.getNewGrid();
+		this.importFile = this.frame.getImportFile();
+		this.saveAs = this.frame.getSaveAs();
+		this.solve = this.frame.getSolve();
+
+		this.save.addActionListener(this);
+		this.close.addActionListener(this);
+		this.newGrid.addActionListener(this);
+		this.importFile.addActionListener(this);
+		this.saveAs.addActionListener(this);
+		this.solve.addActionListener(this);
 
 		/*Séparation entre les régions*/
 		this.gridLayout.setHgap(3);
 		this.gridLayout.setVgap(3);
 
-		/*Séparation des cases*/
-		this.regionLayout.setHgap(1);
-		this.regionLayout.setVgap(1);
+		this.c = this.frame.getContentPane();
 
-		/*MAJ de l'apparence du pannel général*/
 		this.gridPanel.setLayout(this.gridLayout);
-		
-		/*Initialisation des régions*/
-		for(int regionX = 0; regionX < 3; regionX++)
+
+		this.generalPanel.setLayout(new BorderLayout());
+		this.generalPanel.add(this.gridPanel, BorderLayout.CENTER);
+
+		for(int i = 0; i < 3; i++)
 		{
-			for(int regionY = 0; regionY < 3; regionY++)
+			for(int j = 0; j < 3; j++)
 			{
-				this.regionPanel[regionX][regionY] = new Panel();
-				this.regionPanel[regionX][regionY].setLayout(this.regionLayout);
-
-				/*Initialisation des cases*/
-				for(int boxX = 0; boxX < 3; boxX++)
-				{
-					for(int boxY = 0; boxY < 3; boxY++)
-					{
-						int d = this.matriceSudo[regionX][regionY][boxX][boxY];
-
-						if(d != 0)
-						{
-							this.sudoku.getRegion(regionX, regionY).setBoxDigit(boxX, boxY, d);
-							this.sudoku.getRegion(regionX, regionY).setBoxIsFixed(boxX, boxY, true);
-						}
-
-						this.digit = this.sudoku.getRegion(regionX, regionY).getBoxDigit(boxX, boxY);
-						this.isFixed = this.sudoku.getRegion(regionX, regionY).getBoxIsFixed(boxX, boxY);
-
-						if((this.digit == 0))
-						{
-							this.boxes[boxX][boxY] = new Button(" ");
-							Count counter = new Count();
-							this.boxes[boxX][boxY].addActionListener(new ButtonManagement(counter, this.boxes[boxX][boxY]));
-							this.matriceSudo[regionX][regionY][boxX][boxY] = counter.getDigit();
-						}
-
-						else if((this.digit > 0) && (this.digit <= 9) && (this.isFixed == false))
-						{
-							this.boxes[boxX][boxY] = new Button(Integer.toString(this.digit));
-							Count counter = new Count();
-							this.boxes[boxX][boxY].addActionListener(new ButtonManagement(counter, this.boxes[boxX][boxY]));
-							this.matriceSudo[regionX][regionY][boxX][boxY] = counter.getDigit();
-						}
-
-						else
-						{
-							Font font = new Font("Arial", Font.BOLD, 20);
-							this.boxes[boxX][boxY] = new Button(Integer.toString(this.digit));
-							this.boxes[boxX][boxY].setFont(font);
-						}
-
-						this.regionPanel[regionX][regionY].add(this.boxes[boxX][boxY]);
-					}
-				}
-
-				this.gridPanel.add(this.regionPanel[regionX][regionY]);
+				this.regionPanel[i][j] = new Panel();
+				this.regionPanel[i][j].setLayout(this.regionLayout);
+				this.regionPanel[i][j].setBorder(BorderFactory.createCompoundBorder());
 			}
 		}
 
-		this.frame.add(this.gridPanel);
+		for(int i = 0; i < 9; i++)
+		{
+			for(int j = 0; j < 9; j++)
+			{
+				int d = this.grid.getBoxDigit(i, j);
+				boolean f = this.grid.getBoxIsFixed(i, j);
+
+				if(d == 0)
+				{
+					this.boxesButton[i][j] = new Button(" ");
+					Count counter = new Count();
+					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j], f));
+				}
+
+				else if((d != 0) && (f == false))
+				{
+					this.boxesButton[i][j] = new Button(Integer.toString(d));
+					Count counter = new Count();
+					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j], f));
+				}
+
+				else if((d != 0) && (f == true))
+				{
+					this.boxesButton[i][j] = new Button(Integer.toString(d));
+					Font font = new Font("Arial", Font.PLAIN, 20);
+					this.boxesButton[i][j].setFont(font);
+					Count counter = new Count();
+					this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j], f));
+				}
+
+				this.boxesButton[i][j].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+				this.regionPanel[(int)(i/3)][(int)(j/3)].add(this.boxesButton[i][j]);
+				this.gridPanel.add(this.regionPanel[(int)(i/3)][(int)(j/3)]);
+			}
+		}
+		this.c.add(this.generalPanel);
 		this.frame.setVisible(true);
 	}
 
-	public boolean verifLine(int regionLine, int regionY)
+	public void openFile()
 	{
-		boolean one = false;
-		boolean two = false;
-		boolean three = false;
-		boolean four = false;
-		boolean five = false;
-		boolean six = false;
-		boolean seven = false;
-		boolean eight = false;
-		boolean nine = false;
+		JFileChooser filePicked = new JFileChooser(new File("."));
+		File file;
+		String fileName = "";
+
+		int[] buffer = new int[82];
+
+		if(filePicked.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+		{
+			file = filePicked.getSelectedFile();
+			try
+			{
+				FileInputStream fileIn = new FileInputStream(file);
+				DataInputStream read = new DataInputStream(fileIn);
+
+				for(int i = 0; i < 9; i++)
+				{
+					buffer[i] = read.readInt();
+					//System.out.println(Integer.toString(buffer[i]));
+				}
+
+				try
+				{
+					read.close();
+				}
+
+				catch(IOException ioe)
+				{
+					ioe.printStackTrace();
+				}
+
+				fileIn.close();
+			}
+
+			catch(IOException ioe)
+			{
+				ioe.printStackTrace();
+			}
+
+
+
+			for(int i = 0; i < 9; i++)
+			{
+				fileName = Integer.toString(buffer[i]);
+				//System.out.println("fileName length = " + fileName.length());
+				for(int j = 0; j < 9; j++)
+				{	
+					if(j-(9-fileName.length()) >= 0)
+					{
+						//System.out.println(fileName);
+						//System.out.print("; j = "+j);
+						//System.out.println("; New fileName = " + fileName);
+						this.sudoMatrix[i][j] = Integer.parseInt(fileName.substring(j-(9-fileName.length()),j-(9-fileName.length())+1));
+						//setValue(0,i,j,Integer.parseInt(fileName.substring(j-(9-fileName.length()),j-(9-fileName.length())+1)));
+						//setValueGrille(i,j,Integer.parseInt(fileName.substring(j-(9-fileName.length()),j-(9-fileName.length())+1)));
+					}
+
+					else
+					{
+						//System.out.print("0");
+						this.sudoMatrix[i][j] = 0;
+						//setValue(0,i,j,0);
+						//setValueGrille(i,j,0);
+					}
+				}
+			}
+		}
+
+		for(int i = 0; i < 9; i++)
+		{
+			for(int j = 0; j < 9; j++)
+			{
+				int d = this.sudoMatrix[i][j];
+				boolean f = false;
+
+				if(d == 0)
+				{
+					f = false;
+				}
+
+				else
+				{
+					f = true;
+				}
+
+				this.grid.setBoxDigit(i, j, d);
+				this.grid.setBoxIsFixed(i, j, f);
+
+				this.digit = this.grid.getBoxDigit(i, j);
+				this.isFixed = this.grid.getBoxIsFixed(i, j);
+
+				if(this.digit == 0)
+				{
+					this.boxesButton[i][j].setText(" ");
+				}
+
+				else if((this.digit >= 0) && (this.digit <= 9) && (this.isFixed == false))
+				{
+					this.boxesButton[i][j].setText(Integer.toString(d));
+				}
+
+				else if((this.digit >= 0) && (this.digit <= 9) && (this.isFixed == true))
+				{
+					Font font = new Font("Arial", Font.BOLD, 20);
+					this.boxesButton[i][j].setText(Integer.toString(d));
+					this.boxesButton[i][j].setFont(font);
+				}
+			}
+		}
+
+
+		/*On refet une grille de jeu*/
+		/*this.grid = new Grid();
+
+		this.gridLayout.setHgap(3);
+		this.gridLayout.setVgap(3);
+
+		this.c = new Container();
+		this.c = this.frame.getContentPane();
+
+		this.generalPanel = new JPanel();
+		this.generalPanel.setLayout(new BorderLayout());
+		this.generalPanel.add(this.gridPanel, BorderLayout.CENTER);
+
+		this.boxesButton = new Button[9][9];
+
+		this.gridLayout = new GridLayout(3, 3);
+		this.regionLayout = new GridLayout(3, 3);
+
+		this.regionPanel = new Panel[3][3];
+
+		this.gridPanel = new Panel();
+		this.gridPanel.setLayout(this.gridLayout);
 
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 3; j++)
 			{
-				if(this.matriceSudo[regionY][i][regionLine][j] == 1)
-				{
-					one = true;
-				}
-
-				else if(this.matriceSudo[regionY][i][regionLine][j] == 2)
-				{
-					two = true;
-				}
-
-				else if(this.matriceSudo[regionY][i][regionLine][j] == 3)
-				{
-					three = true;
-				}
-
-				else if(this.matriceSudo[regionY][i][regionLine][j] == 4)
-				{
-					four = true;
-				}
-
-				else if(this.matriceSudo[regionY][i][regionLine][j] == 5)
-				{
-					five = true;
-				}
-
-				else if(this.matriceSudo[regionY][i][regionLine][j] == 6)
-				{
-					six = true;
-				}
-
-				else if(this.matriceSudo[regionY][i][regionLine][j] == 7)
-				{
-					seven = true;
-				}
-
-				else if(this.matriceSudo[regionY][i][regionLine][j] == 8)
-				{
-					eight = true;
-				}
-
-				else if(this.matriceSudo[regionY][i][regionLine][j] == 9)
-				{
-					nine = true;
-				}
-
-				System.out.print(this.matriceSudo[regionY][i][regionLine][j] + " ");
+				this.regionPanel[i][j] = new Panel();
+				this.regionPanel[i][j].setLayout(this.regionLayout);
+				this.regionPanel[i][j].setBorder(BorderFactory.createCompoundBorder());
 			}
 		}
 
-		return (one&&two&&three&&four&&five&&six&&seven&&eight&&nine);
+		for(int i = 0; i < 9; i++)
+		{
+			for(int j = 0; j < 9; j++)
+			{
+				int d = this.sudoMatrix[i][j];
+				boolean f = false;
+
+				if(d == 0)
+				{
+					f = false;
+				}
+
+				else
+				{
+					f = true;
+				}
+
+				this.grid.setBoxDigit(i, j, d);
+				this.grid.setBoxIsFixed(i, j, f);
+
+				if(d == 0)
+				{
+					this.boxesButton[i][j] = new Button(" ");
+				}
+
+				else if((d != 0) && (f == false))
+				{
+					this.boxesButton[i][j] = new Button(Integer.toString(d));
+				}
+
+				else if((d != 0) && (f == true))
+				{
+					this.boxesButton[i][j] = new Button(Integer.toString(d));
+					Font font = new Font("Arial", Font.PLAIN, 20);
+					this.boxesButton[i][j].setFont(font);
+				}
+
+				this.boxesButton[i][j].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+				this.regionPanel[(int)(i/3)][(int)(j/3)].add(this.boxesButton[i][j]);
+				this.gridPanel.add(this.regionPanel[(int)(i/3)][(int)(j/3)]);
+
+				Count counter = new Count();
+				this.boxesButton[i][j].addActionListener(new ButtonManagement(counter, this.boxesButton[i][j]));
+			}
+		}
+
+		this.generalPanel.add(this.gridPanel);
+		this.c.add(this.generalPanel);
+		this.frame.setVisible(true);*/
+
+		/*String fileNamee = new String("");
+		JFileChooser filePicked = new JFileChooser();
+
+		filePicked.setDialogTitle("Choisir un file");
+		filePicked.setApproveButtonText("OK");
+
+		int returnVal = filePicked.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+        {
+            File file = filePicked.getSelectedFile();
+        }
+        
+        this.f = filePicked.getSelectedFile();*/
 	}
-	
-	public boolean verifColumn(int regionX, int regionColumn)
+
+	public void actionPerformed(ActionEvent event)
 	{
-		boolean one = false;
-		boolean two = false;
-		boolean three = false;
-		boolean four = false;
-		boolean five = false;
-		boolean six = false;
-		boolean seven = false;
-		boolean eight = false;
-		boolean nine = false;
-
-		for(int i = 0; i < 3; i++)
+		if(event.getSource() == this.importFile)
 		{
-			for(int j = 0; j < 3; j++)
-			{
-				if(this.matriceSudo[i][regionColumn][j][regionX] == 1)
-				{
-					one = true;
-				}
-
-				else if(this.matriceSudo[i][regionColumn][j][regionX] == 2)
-				{
-					two = true;
-				}
-
-				else if(this.matriceSudo[i][regionColumn][j][regionX] == 3)
-				{
-					three = true;
-				}
-
-				else if(this.matriceSudo[i][regionColumn][j][regionX] == 4)
-				{
-					four = true;
-				}
-
-				else if(this.matriceSudo[i][regionColumn][j][regionX] == 5)
-				{
-					five = true;
-				}
-
-				else if(this.matriceSudo[i][regionColumn][j][regionX] == 6)
-				{
-					six = true;
-				}
-
-				else if(this.matriceSudo[i][regionColumn][j][regionX] == 7)
-				{
-					seven = true;
-				}
-
-				else if(this.matriceSudo[i][regionColumn][j][regionX] == 8)
-				{
-					eight = true;
-				}
-
-				else if(this.matriceSudo[i][regionColumn][j][regionX] == 9)
-				{
-					nine = true;
-				}
-
-				System.out.println(this.matriceSudo[i][regionColumn][j][regionX] + " ");
-			}
+			openFile();
 		}
-
-		System.out.println((one&&two&&three&&four&&five&&six&&seven&&eight&&nine));
-		return (one&&two&&three&&four&&five&&six&&seven&&eight&&nine);
 	}
 
-	public boolean verifRegion(int regionX, int regionY)
-	{
-		boolean one = false;
-		boolean two = false;
-		boolean three = false;
-		boolean four = false;
-		boolean five = false;
-		boolean six = false;
-		boolean seven = false;
-		boolean eight = false;
-		boolean nine = false;
-
-		for(int i = 0; i < 3; i++)
-		{
-			for(int j = 0; j < 3; j++)
-			{
-				if(this.matriceSudo[regionY][regionX][i][j] == 1)
-				{
-					one = true;
-				}
-
-				else if(this.matriceSudo[regionY][regionX][i][j] == 2)
-				{
-					two = true;
-				}
-
-				else if(this.matriceSudo[regionY][regionX][i][j] == 3)
-				{
-					three = true;
-				}
-
-				else if(this.matriceSudo[regionY][regionX][i][j] == 4)
-				{
-					four = true;
-				}
-
-				else if(this.matriceSudo[regionY][regionX][i][j] == 5)
-				{
-					five = true;
-				}
-
-				else if(this.matriceSudo[regionY][regionX][i][j] == 6)
-				{
-					six = true;
-				}
-
-				else if(this.matriceSudo[regionY][regionX][i][j] == 7)
-				{
-					seven = true;
-				}
-
-				else if(this.matriceSudo[regionY][regionX][i][j] == 8)
-				{
-					eight = true;
-				}
-
-				else if(this.matriceSudo[regionY][regionX][i][j] == 9)
-				{
-					nine = true;
-				}
-
-				System.out.print(this.matriceSudo[regionY][regionX][i][j] + " ");
-			}
-
-			System.out.println("");
-		}
-
-		System.out.println((one&&two&&three&&four&&five&&six&&seven&&eight&&nine));
-		return (one&&two&&three&&four&&five&&six&&seven&&eight&&nine);
+	public static void main(String[] args) {
+		Sudoku sudo = new Sudoku();
 	}
 }

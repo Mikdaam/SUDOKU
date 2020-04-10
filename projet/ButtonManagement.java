@@ -8,26 +8,37 @@ public class ButtonManagement implements ActionListener
 {
 	private Count counter;
 	private JButton button;
+	private boolean isFixed;
 
-	public ButtonManagement(Count c, JButton b)
+	public ButtonManagement(Count c, JButton b, boolean f)
 	{
 		this.counter = c;
 		this.button = b;
+		this.isFixed = f;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent event)
 	{
-		this.counter.setDigit();
-
-		if (this.counter.getDigit() == 0)
+		if(this.isFixed == false)
 		{
-			this.button.setText(" ");
+			this.counter.setDigit();
+
+			if (this.counter.getDigit() == 0)
+			{
+				this.button.setText(" ");
+			}
+
+			else
+			{
+				this.button.setText(this.counter.toString());
+			}
 		}
 
 		else
 		{
-			this.button.setText(this.counter.toString());
+			int d = this.counter.getDigit();
+			this.button.setText(Integer.toString(d));
 		}
 	}
 }

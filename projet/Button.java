@@ -10,7 +10,7 @@ public class Button extends JButton
 	public Button(String strDigit)
 	{
 		super(strDigit);
-		this.setBorderPainted(false);
+		//this.setBorderPainted(false);
 		this.setBackground(Color.WHITE);
 
 		Font font = new Font("Arial", Font.PLAIN, 20);

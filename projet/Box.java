@@ -1,25 +1,36 @@
-/*Classe qui représente une case d'une région*/
+/*Classe qui gère une case de la grille de sudoku*/
 
-public class Box 
+public class Box
 {
-	private int digit;
-	private boolean isFixed;
+	public int digit; //Valeur d'une case
+	public boolean isFixed; //Renvoie 'true' si la case est censée être fixe
 
-	/*Initialise la valeur d'une case
-	  et son statut (fixe ou non)*/
+	/*Les constructeurs suivants crées une case soit vide, soit initialisé avec une valeur et fixe ou non*/
+	public Box()
+	{
+		this.digit = 0;
+		this.isFixed = false;
+	}
+
+	public Box(int d)
+	{
+		this.digit = d;
+		this.isFixed = false;
+	}
+
 	public Box(int d, boolean f)
 	{
 		this.digit = d;
 		this.isFixed = f;
 	}
 
-	/*Renvoie la valeur d'une case*/
+	/*Accéder à la valeur de la case*/
 	public int getDigit()
 	{
 		return this.digit;
 	}
 
-	/*Renvoie le statut d'une case*/
+	/*Savoir si une case est fixe ou non*/
 	public boolean getIsFixed()
 	{
 		return this.isFixed;
@@ -31,9 +42,18 @@ public class Box
 		this.digit = d;
 	}
 
-	/*MAJ du statut d'une case*/
+	/*MAJ de la valeur fixe d'une case*/
 	public void setIsFixed(boolean f)
 	{
 		this.isFixed = f;
 	}
+
+	/*Méthode qui convertit en chaine de caractère modifiable
+	@Override
+	public String toString()
+	{
+		StringBuffer strb = new StringBuffer();
+		
+		return strb.append(this.digit).toString();
+	}*/
 }
