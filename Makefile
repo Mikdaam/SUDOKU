@@ -12,4 +12,4 @@ run:
 	$(JV) $(JVFLAGS) Main
 
 clean:
-	$(RM) *.class
+	$(RM) class/*.class
