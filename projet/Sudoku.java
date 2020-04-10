@@ -51,7 +51,15 @@ public class Sudoku implements ActionListener
 	private int digit; //Valeur d'une case
 	private boolean isFixed; //Statut d'une case
 
-	private int[][] sudoMatrix = new int[9][9];
+	private int[][] sudoMatrix = {{0,0,0,0,9,5,0,0,4},
+								   {5,3,0,4,0,8,7,0,2},
+								   {0,0,0,7,0,0,6,0,3},
+								   {9,0,0,0,3,4,0,8,0},
+								   {0,4,0,0,1,0,0,7,0},
+								   {0,2,0,5,7,0,0,0,6},
+								   {4,0,9,0,0,2,0,0,0},
+								   {6,0,7,9,0,3,0,2,1},
+								   {2,0,0,6,5,0,0,0,0}};;
 
 	public Sudoku()
 	{
@@ -346,9 +354,5 @@ public class Sudoku implements ActionListener
 		{
 			openFile();
 		}
-	}
-
-	public static void main(String[] args) {
-		Sudoku sudo = new Sudoku();
 	}
 }
