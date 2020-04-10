@@ -574,16 +574,112 @@ public class Sudoku implements ActionListener
 		}
 	}
 
-	public void actionPerformed(ActionEvent event)
-	{
-		if(event.getSource() == this.importFile)
-		{
-			this.openFile();
-		}
+	private int[] numberUnassigned(int row, int col)
+    {
+        int numunassign = 0;
+        for(int i=0;i<9;i++)
+        {
+            for(int j=0;j<9;j++)
+            {
+                if(sudoMatrix[i][j] == 0)    
+                {
+                    row = i;
+                    col = j;
+                    numunassign = 1;
+                    int[] a = {numunassign, row, col};
+                    return a;
+                }
+            }
+        }
+        int[] a = {numunassign, -1, -1};
+        return a;
+    }
 
-		if(event.getSource() == this.save)
-		{
-			this.save();
-		}
-	}
+    private boolean isSafe(int n, int r, int c)
+    {
+        for(int i=0;i<9;i++)
+        {
+            if(sudoMatrix[r][i] == n)
+                return false;
+        }
+        for(int i=0;i<9;i++)
+        {
+            if(sudoMatrix[i][c] == n)
+                return false;
+        }
+        int row_start = (r/3)*3;
+        int col_start = (c/3)*3;
+        for(int i=row_start;i<row_start+3;i++)
+        {
+            for(int j=col_start;j<col_start+3;j++)
+            {
+                if(sudoMatrix[i][j]==n)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean solveSudoku()
+    {
+        int row=0;
+        int col=0;
+        int[] a = numberUnassigned(row, col);
+        if(a[0] == 0)
+            return true;
+        row = a[1];
+        col = a[2];
+        for(int i=1;i<=9;i++)
+        {
+            if(isSafe(i, row, col))
+            {
+                this.sudoMatrix[row][col] = i;
+                if(solveSudoku())
+                    return true;
+                sudoMatrix[row][col]=0;
+            }
+        }
+        return false;
+    }
+
+    private void printSudoku()
+    {
+        for(int i=0;i< 9;i++)
+        {
+            for(int j=0;j< 9;j++)
+            {
+                this.boxesButton[i][j].setText(Integer.toString(this.sudoMatrix[i][j]));
+            }
+        }
+    }
+
+    public void Resoudre() {
+        if (solveSudoku()) {
+            printSudoku();
+        }
+        else
+            JOptionPane.showMessageDialog(this.frame, "Impossible de resoudre ce Sudoku !", "Impossible", JOptionPane.ERROR_MESSAGE);
+
+    }
+
+    public void actionPerformed(ActionEvent event)
+    {
+        if(event.getSource() == this.importFile)
+        {
+            this.openFile();
+        }
+
+        if(event.getSource() == this.save)
+        {
+            this.save();
+        }
+
+        if (event.getSource() == this.solve) {
+            long init = System.nanoTime();
+            this.Resoudre();
+            long end = System.nanoTime();
+            String temps = "Cette grille a \u00E9t\u00E9 r\u00E9sout en "+(end - init)/1000000+"ms";
+            JOptionPane.showMessageDialog(this.frame, temps, "Temps de r\u00E9solution", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
 }
